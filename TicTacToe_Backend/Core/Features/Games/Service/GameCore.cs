@@ -1,8 +1,9 @@
-﻿using DataAccess;
+﻿using Shared;
 using Domain;
 using Domain.TicTacToe;
 using Domain.TicTacToe.Exceptions;
 using Domain.TicTacToe.GameEvents;
+using DataAccess;
 
 namespace Features.Games.Service
 {
