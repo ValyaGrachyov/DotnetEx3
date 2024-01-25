@@ -8,8 +8,9 @@ public class TicTacToeGameSession
 
     public string GameCreatorId { get; init; }
 
-    public string? OpponentId { get; init; }
+    public string? OpponentId { get; set; }
 
+    public TicTacToeGameInfo? CurrnetGame { get; set; }
 
     public TicTacToeGameState CurrentGameState { get; set; } = TicTacToeGameState.WaitingForOpponent;
 

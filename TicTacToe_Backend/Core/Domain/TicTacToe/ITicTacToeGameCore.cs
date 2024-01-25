@@ -8,5 +8,7 @@ public interface ITicTacToeGameCore
     /// <param name="gameSession"></param>
     /// <param name="applicantId"></param>
     /// <returns></returns>
-    public ITicTacToeGameProccessor GetGameProccessor(string gameSession, string applicantId);
+    public ITicTacToeGameProccessor? GetGameProccessor(string gameSession, string applicantId);
+
+    public void KeepALiveSession(string gameSession);
 }

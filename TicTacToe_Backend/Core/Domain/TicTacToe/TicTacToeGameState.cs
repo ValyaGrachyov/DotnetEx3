@@ -11,5 +11,6 @@ public enum TicTacToeGameState
     WaitingForOpponent,
     Closed,
     Started,
+    Loading,
     RestartCooldown
 }

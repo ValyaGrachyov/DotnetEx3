@@ -9,7 +9,7 @@ public class TicTacToeGameInfo
       TicTacToeSymbols.None, TicTacToeSymbols.None, TicTacToeSymbols.None
     };
 
-    public bool isPlayer1Turn { get; set; }
+    public bool IsPlayer1Turn { get; set; }
 
     public TicTacToePlayer Player1 { get; init; }
 

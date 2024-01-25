@@ -2,9 +2,9 @@
 namespace Domain.TicTacToe;
 public interface ITicTacToeGameProccessor
 {
-    public void MakeTurn(int row, int column);
+    public Task MakeTurnAsync(int row, int column);
 
-    public void ExitGame();
+    public Task ExitGameAsync();
 
-    public void JoinGame();
+    public Task JoinGameAsync();
 }
