@@ -8,7 +8,7 @@ export const AuthData = () => useContext(AuthContext);
 
 export const AuthWrapper = () => {
 
-     const [ user, setUser ] = useState({username: "", isAuthenticated: false})
+     const [ user, setUser ] = useState({username: "", isAuthenticated: true})
 
      const login = (username, password) => {
         return API.login(username, password)
