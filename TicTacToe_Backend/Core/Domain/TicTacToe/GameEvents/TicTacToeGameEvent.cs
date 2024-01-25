@@ -2,5 +2,6 @@
 
 public class TicTacToeGameEvent
 {
-    public string SessionId { get; set; }
+    public string RoomId { get; init; }
+
 }

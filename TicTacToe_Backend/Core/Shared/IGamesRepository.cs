@@ -2,11 +2,15 @@
 
 namespace DataAccess;
 
-public interface IGamesRepository
+public interface IGameRoomRepository
 {
-    public Task<TicTacToeGameSession?> GetGameSessionByIdAsync(string sessionId);
+    public Task<TicTacToeGameRoom?> GetGameRoomByIdAsync(string sessionId); 
 
-    public Task UpdateSessionStatusAsync(string sessionId, TicTacToeGameState state);
+    public Task<TicTacToeGameRoom?> GetGameSessionByIdAsync(string sessionId);
 
-    public Task UpdateSessionAsync(TicTacToeGameSession session);
+    public Task UpdateSessionStatusAsync(string sessionId, TicTacToeRoomState state);
+
+    public Task UpdateRoomGameAsync(string roomId, TicTacToeGame game);
+
+    public Task UpdateSessionAsync(TicTacToeGameRoom session);
 }

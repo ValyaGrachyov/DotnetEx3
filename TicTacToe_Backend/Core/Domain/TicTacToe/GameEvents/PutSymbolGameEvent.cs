@@ -2,9 +2,12 @@
 
 public class PutSymbolGameEvent : TicTacToeGameEvent
 {
-    public int Row { get; set; }
+    public string UserId { get; init; }
 
-    public int Column { get; set; }
+    public int Row { get; init; }
 
-    public TicTacToeSymbols PutSymbol { get; set; } 
+    public int Column { get; init; }
+
+    public TicTacToeSymbols PutSymbol { get; init; } 
+
 }
