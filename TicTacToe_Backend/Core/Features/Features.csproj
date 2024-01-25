@@ -7,8 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Games\**" />
+      <EmbeddedResource Remove="Games\**" />
+      <None Remove="Games\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Folder Include="GameManagment\" />
-      <Folder Include="Games\Queries\" />
       <Folder Include="User\" />
     </ItemGroup>
 
