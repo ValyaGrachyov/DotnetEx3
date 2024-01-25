@@ -9,9 +9,7 @@ public static class ServiceCollectionExtentions
     {
         services.AddDbContext<TicTacToeContext>(options =>
         {
-            options.UseNpgsql(configuration.GetSection("DB")
-                                            .GetSection("Postgres")
-                                            .GetConnectionString("ConnectionString"));
+            options.UseNpgsql(configuration.GetSection("DB:Postgres:ConnectionString").Value);
         });
         return services;
     }

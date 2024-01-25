@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Migrations;
 using TicacToe_Backend.Helpers.Extensions;
 
@@ -36,23 +37,24 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
+await TryMigrateDatabaseAsync(app);
 app.Run();
 
-// static async Task TryMigrateDatabaseAsync(WebApplication app)
-// {
-//     try
-//     {
-//         await using var scope = app.Services.CreateAsyncScope();
-//         var sp = scope.ServiceProvider;
-//
-//         await using var db = sp.GetRequiredService<CarsharingContext>();
-//
-//         await db.Database.MigrateAsync();
-//     }
-//     catch (Exception e)
-//     {
-//         app.Logger.LogError(e, "Error while migrating the database");
-//         Environment.Exit(-1);
-//     }
-//
-// }
+static async Task TryMigrateDatabaseAsync(WebApplication app)
+{
+    try
+    {
+        await using var scope = app.Services.CreateAsyncScope();
+        var sp = scope.ServiceProvider;
+
+        await using var db = sp.GetRequiredService<TicTacToeContext>();
+
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception e)
+    {
+        app.Logger.LogError(e, "Error while migrating the database");
+        Environment.Exit(-1);
+    }
+
+}
