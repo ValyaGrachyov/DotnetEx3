@@ -10,6 +10,9 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 RUN dotnet tool install --global dotnet-ef --version 7.0.12
 COPY ["TicTacToe_Backend/TicTacToe_Backend.csproj", "TicTacToe_Backend/"]
+COPY ["Infrastructure/Migrations/Migrations.csproj", "Infrastructure/Migrations/"]
+COPY ["Core/Contracts/Contracts.csproj", "Core/Contracts/"]
+COPY ["Core/Domain/Domain.csproj", "Core/Domain/"]
 RUN dotnet restore "TicTacToe_Backend/TicTacToe_Backend.csproj"
 COPY . .
 WORKDIR "/src/TicTacToe_Backend"

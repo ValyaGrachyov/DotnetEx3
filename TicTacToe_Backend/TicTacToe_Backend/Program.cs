@@ -4,7 +4,8 @@ using TicacToe_Backend.Helpers.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddPostgres(builder.Configuration);
+builder.Services.AddPostgres(builder.Configuration)
+                .AddMongo(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
