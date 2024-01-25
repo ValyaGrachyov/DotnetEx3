@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, Link } from "react-router-dom";
+import { Route, Routes, Link } from "react-router-dom";
 import routesList from "./navigation"; 
 import { AuthData } from "./Auth/AuthWrapper";
 import { useLocation } from "react-router-dom";
@@ -42,8 +42,7 @@ export const RenderNavBar = () => {
 
               { user.isAuthenticated ?
               <div className="menuItem"><Link to={'#'} onClick={logout}>Log out</Link></div>
-              :
-              <Navigate to={"/login"} replace={true}/>}
+              : <></>}
          </div>
     )
 }

@@ -1,48 +1,32 @@
 import { createContext, useContext, useState } from "react"
 import { RenderRoutes, RenderNavBar } from "../RenderRoutes";
 import Header from "../Header";
+import API from "../../httpclient";
 
 const AuthContext = createContext();
 export const AuthData = () => useContext(AuthContext);
 
-
 export const AuthWrapper = () => {
 
-     const [ user, setUser ] = useState({name: "", isAuthenticated: true})
+     const [ user, setUser ] = useState({username: "", isAuthenticated: false})
 
-     const login = (userName, password) => {
-
-          // Make a call to the authentication API to check the username
-          
-          return new Promise((resolve, reject) => {
-
-               if (password === "password") {
-                    setUser({name: userName, isAuthenticated: true})
-                    resolve("success")
-               } else {
-                    reject("Incorrect password")
-               }
-          })
-          
-          
+     const login = (username, password) => {
+        return API.login(username, password)
+        .then(r => setUser({...user, username: r.username, isAuthenticated: true}));
      }
-     const logout = () => {
 
+     const logout = () => {
+          API.logout();
           setUser({...user, isAuthenticated: false})
      }
 
-
      return (
-          
                <AuthContext.Provider value={{user, login, logout}}>
                     <>
                          <Header />
                          <RenderNavBar/>
                          <RenderRoutes />
                     </>
-                    
                </AuthContext.Provider>
-          
      )
-
 }

@@ -14,8 +14,8 @@ export const routesList = [
     { path: "/leader-board", name: "Leader Board", element: <LeaderBoardPage/>, isNavigationBar: true,  isPrivate: true },
     { path: "/log-out", name: "Log out", element: <Logout/>, isNavigationBar: true, isPrivate: true },
     // public routes
-    { path: "/login", name: "Login", element: <LoginPage/>, isNavigationBar:false, isPrivate: false },
-    { path: "/register", name: "Registration", element: <RegistrationPage/>, isNavigationBar:false, isPrivate: false },
+    { path: "/login", name: "Login", element: <LoginPage/>, isNavigationBar:false, isPrivate: false},
+    { path: "/registration", name: "Registration", element: <RegistrationPage/>, isNavigationBar:false, isPrivate: false},
     //other
     { path: "*", name: "Not Found", element: <NotFoundPage/>, isNavigationBar: false, isPrivate: false },
 ]
