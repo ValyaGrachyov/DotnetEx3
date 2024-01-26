@@ -5,7 +5,8 @@ import GameStatusTitle from "./GameStatusTitle"
 import GameState from "./GameState";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { AuthData, getTokenFromSessionStorage } from "../Auth/AuthWrapper";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import API from "../../httpclient";
 
 const PLAYER_X = "X";
 const PLAYER_O = "O";
@@ -45,13 +46,17 @@ function TicTacToe() {
   );
 }
 
+function 
+
 
 function GameHubConnection({iAmPlayer}) {
+  const navigate = useNavigate();
+
   const [awaitingAction, setAwaitingAction] = useState();
   const [mySymbol, setMySymbol] = useState(null);
   const [tiles, setTiles] = useState(EMPTY_BOARD);
   const [playerTurn, setPlayerTurn] = useState(PLAYER_X);
-  const [player1, setPlayer1] = useState(DEFAULT_PLAYER);
+  const [player1, setPlayer1] = useState({username:"unknown", symbol:"NaN"});
   const [player2, setPlayer2] = useState(DEFAULT_PLAYER);
   const [strikeClass, setStrikeClass] = useState(null);
   const [winnerUsername, setWinnerUsername] = useState(null);
@@ -62,56 +67,50 @@ function GameHubConnection({iAmPlayer}) {
   const [connection, setConnection] = useState();
   const { user } = AuthData();
 
-  function resetGame() {
-    setPlayer1(DEFAULT_PLAYER);
-    setPlayer2(DEFAULT_PLAYER);
-    setPlayerTurn(PLAYER_X);
-    setTiles(EMPTY_BOARD);
-    setMySymbol(null);
-    setGameState(GameState.loading);
-    setWinnerUsername(null);
-    setStrikeClass(null);
-    setAwaitingAction(null);
-  }
-
-
   function proccessGameStart(event) {
-    resetGame();
-
     const player1E = event.player1;
     const player2E = event.player2;
     const player1Symbol = mapSymbol(player1E.symbol);
     const player2Symbol = mapSymbol(player2E.symbol);
-    setPlayer1({...player1, username: player1E.userName, symbol:player1Symbol});
-    setPlayer2({...player2, username: player2E.userName, symbol: player2Symbol});
-    setPlayerTurn(event.isPlayer1Turn ? player1Symbol : player2Symbol);
+    setPlayer1(player =>{ return {...player, username: player1E.userName, symbol:player1Symbol}});
+    setPlayer2(player => { return {...player, username: player2E.userName, symbol: player2Symbol}});
+    setPlayerTurn(old => event.isPlayer1Turn ? player1Symbol : player2Symbol);
     setTiles(EMPTY_BOARD);
     if (iAmPlayer) {
-      if (player1E.userName == user.username)
-          setMySymbol(player1Symbol);
-      else if (player2E.userName == user.username)
-          setMySymbol(player2Symbol);
-      else
-          setMySymbol(null);
+      if (player1E.username == user.username){
+        setMySymbol(old=> player1Symbol);
+      }
+      else if (player2E.username == user.username){
+        setMySymbol(old => player2Symbol);
+      }
+      else{
+        console.log("alert, alert alert")
+        setMySymbol(null);
+      }
     }
   }
 
   function proccessTurnSwitch(event) {
     if (event.waitingForUser == user.username)
     {
-      setPlayerTurn(mySymbol);
+      setPlayerTurn(old => player1.username == user.username ? player1.symbol : player2.symbol);
       setGameState(GameState.myTurn);
     }
     else
+    {
       setGameState(GameState.opponentTurn);
+      setPlayerTurn(old => player1.username == user.username ? player2.symbol : player1.symbol);
+    }
   }
 
   function proccessPutSymbol(event) {
     const symbol = mapSymbol(event.putSymbol);
     const tilesCopy = [...tiles];
     tilesCopy[event.row*3+event.column] = symbol;
-    setTiles(tilesCopy);
+    setTiles(old=> tilesCopy);
 
+    console.log(player1);
+    console.log(player2);
     if (awaitingAction){
       setAwaitingAction();
     }
@@ -148,6 +147,15 @@ function GameHubConnection({iAmPlayer}) {
     alert();
   }
 
+  async function joinRoom() { 
+    const joinResult = await API.joinRoom(roomId);
+    if (!joinResult)
+    {
+      alert("You can not start the game");
+      navigate("/games");
+    }
+  }
+
   async function handleTileClick(row, column) {
     if (!iAmPlayer || playerTurn !== mySymbol)
       return;
@@ -169,7 +177,7 @@ function GameHubConnection({iAmPlayer}) {
     const tilesCopy = [...tiles];
     const indx = row * 3 + column;
     tilesCopy[indx] = mySymbol;
-    setTiles(tilesCopy);
+    setTiles(old => [...tilesCopy]);
   }
 
   function proccessGameEvent(event) {
@@ -214,21 +222,28 @@ function GameHubConnection({iAmPlayer}) {
   }
 
   async function loadGameInfo() {
-
+    return "k0c0w";
   }
 
   useEffect(() => {
+
+  }, [mySymbol, tiles, player1, player2]);
+
+  useEffect(() => {
     async function init() {
-        await loadGameInfo();
         await createHubConnection();
+        const roomCreatorUsername = await loadGameInfo();
+        if (iAmPlayer && roomCreatorUsername !== user.username )
+          await joinRoom();
     }
     init();
-
+    console.log("render");
     return () => {
       connection?.invoke("unsubscribeRoomEvents", roomId);
       connection?.stop();
     }
   }, []);
+
 const disabled = !iAmPlayer ||  playerTurn !== mySymbol;
 return(
   <>
@@ -243,5 +258,11 @@ return(
   </>);
 }
 
+
+function Game ({connection}) {
+
+
+  return 
+}
 
 export default TicTacToe;

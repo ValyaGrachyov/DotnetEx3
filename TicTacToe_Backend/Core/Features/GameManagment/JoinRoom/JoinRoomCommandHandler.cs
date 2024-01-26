@@ -12,11 +12,12 @@ public class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
     private readonly IUpdateRecorder _gameEventNotifier;
     private readonly IUserRepository _userRepository;
 
-    public JoinRoomCommandHandler(IGameRoomRepository gameRoomRepository, ITicTacToeGameEngine engine, IUserRepository userRepository)
+    public JoinRoomCommandHandler(IGameRoomRepository gameRoomRepository, ITicTacToeGameEngine engine, IUserRepository userRepository, IUpdateRecorder gameEventNotifier)
     {
         _gameRoomRepository = gameRoomRepository;
         _engine = engine;
         _userRepository = userRepository;
+        _gameEventNotifier = gameEventNotifier;
     }
 
     public async Task<Result> Handle(JoinRoomCommand request, CancellationToken cancellationToken)
@@ -38,7 +39,7 @@ public class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
         try
         {
             var user = await _userRepository.GetUserByIdAsync(request.UserId);
-            if (user == null || user.Rate < room.MaxAllowedPlayerRate)
+            if (user == null || user.Rate >= room.MaxAllowedPlayerRate)
             {
                 return Result.ErrorResult;
             }

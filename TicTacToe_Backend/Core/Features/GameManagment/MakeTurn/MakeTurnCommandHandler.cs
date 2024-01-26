@@ -11,10 +11,11 @@ public class MakeTurnCommandHandler : ICommandHandler<MakeTurnCommand>
     private readonly ITicTacToeGameEngine _engine;
     private readonly IUpdateRecorder _gameEventNotifier;
 
-    public MakeTurnCommandHandler(IGameRoomRepository gameRoomRepository, ITicTacToeGameEngine engine)
+    public MakeTurnCommandHandler(IGameRoomRepository gameRoomRepository, ITicTacToeGameEngine engine, IUpdateRecorder updater)
     {
         _gameRoomRepository = gameRoomRepository;
         _engine = engine;
+        _gameEventNotifier = updater;
     }
 
     public async Task<Result> Handle(MakeTurnCommand request, CancellationToken cancellationToken)

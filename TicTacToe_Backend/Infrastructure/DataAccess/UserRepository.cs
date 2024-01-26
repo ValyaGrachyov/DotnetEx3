@@ -39,7 +39,7 @@ public class UserRepository : IUserRepository
         return null;
     }
 
-    public Task UpdateuserRate(string userId, int updatedRate)
+    public Task UpdateUserRateAsync(string userId, int updatedRate)
     {
         var filter = Builders<UserRate>.Filter.Eq(x => x.UserId, userId);
         var update =  Builders<UserRate>.Update
@@ -51,6 +51,6 @@ public class UserRepository : IUserRepository
     public async Task<int> GetUserRateByIdAsync(string userId)
     {
         var userRate = await _collection.FindAsync(x => x.UserId == userId);
-        return userRate.FirstOrDefault().Rate;
+        return userRate.FirstOrDefault()?.Rate ?? 0;
     }
 }

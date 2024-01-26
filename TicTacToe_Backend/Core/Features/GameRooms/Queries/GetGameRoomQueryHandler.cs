@@ -24,7 +24,7 @@ public class GetGameRoomQueryHandler : IQueryHandler<GetGameRoomQuery, GameRoomD
 
         return new Ok<GameRoomDto>(new GameRoomDto()
         {
-            Id = room.RoomId.ToString(),
+            Id = room.Id.ToString(),
             CreatorUsername = room.CreatorUserName,
             IsBusy = room.CurrentGameState != TicTacToeRoomState.WaitingForOpponent,
             CreatedAtUtc = room.CreationDateTimeUtc,

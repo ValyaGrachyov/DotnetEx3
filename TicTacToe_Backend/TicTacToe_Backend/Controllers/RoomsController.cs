@@ -50,7 +50,9 @@ public class RoomsController: ControllerBase
     public async Task<IActionResult> Join([FromRoute]string id)
     {
         var result = await _mediator.Send(new JoinRoomCommand(HttpContext.User.Claims.FirstOrDefault().Value,id));
-        return Ok(id);
+        if (result.IsSuccess)
+            return Ok();
+        return BadRequest(result.ErrorMessage);
     }
 
     [HttpPost("{id}/exit")]

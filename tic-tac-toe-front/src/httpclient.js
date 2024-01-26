@@ -58,6 +58,19 @@ class AxiosWrapper {
             .catch(() => {});
         return isValidSession;
     }
+
+    async joinRoom(roomId) {
+        let joinResult = false;
+        
+        await this.axiosInstance.post(`/rooms/${roomId}/join`)
+            .then(() => {joinResult = true})
+            .catch((err) => {
+                if (err.data)
+                    alert(err.data);
+            });
+
+        return joinResult;
+    }
 }
 
 const API = new AxiosWrapper();

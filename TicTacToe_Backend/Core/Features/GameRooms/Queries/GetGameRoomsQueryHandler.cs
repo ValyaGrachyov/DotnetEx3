@@ -19,7 +19,7 @@ internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, IEnum
         var rooms = await _gameRoomRepository.GetGameRooms();
         return new Ok<IEnumerable<GameRoomDto>>(rooms.Select(x => new GameRoomDto()
         {
-            Id = x.RoomId.ToString(),
+            Id = x.Id.ToString(),
             CreatorUsername = x.CreatorUserName,
             IsBusy = x.CurrentGameState != TicTacToeRoomState.WaitingForOpponent,
             CreatedAtUtc = x.CreationDateTimeUtc,

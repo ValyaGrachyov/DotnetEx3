@@ -1,6 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
-using Domain.Entities;
+using DataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,12 +23,14 @@ public class AccountController: ControllerBase
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly IJwtGenerator _jwtGenerator;
+    private readonly IUserRepository _repository;
 
-    public AccountController(UserManager<IdentityUser> userManager, IJwtGenerator jwtGenerator, SignInManager<IdentityUser> signInManager)
+    public AccountController(UserManager<IdentityUser> userManager, IJwtGenerator jwtGenerator, SignInManager<IdentityUser> signInManager, IUserRepository userRepository)
     {
         _userManager = userManager;
         _jwtGenerator = jwtGenerator;
         _signInManager = signInManager;
+        _repository = userRepository;
     }
 
     [HttpPost("register")]
@@ -42,6 +43,8 @@ public class AccountController: ControllerBase
 
         if (result.Succeeded)
         {
+            var id = await _userManager.FindByNameAsync(credits.UserName);
+            await _repository.UpdateUserRateAsync(id.Id, 0);
            return Ok();
         }
 
