@@ -1,13 +1,14 @@
-﻿using Domain.TicTacToe;
+﻿using Domain.TicTacToe.GameEvents;
+using Domain.UserStatistics;
 using Features.GameManagment.MakeTurn;
 using MediatR;
-using Microsoft.AspNet.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace TicacToe_Backend.Hubs;
 
 [Authorize]
-public class GameHub : Microsoft.AspNet.SignalR.Hub
+public class GameHub : Hub<IGameEventsReciever>
 {
     private readonly IMediator _mediator;
 
@@ -18,16 +19,21 @@ public class GameHub : Microsoft.AspNet.SignalR.Hub
 
     public async Task SubscribeRoomEvents(string roomId)
     {
-        Groups.Add(Context.ConnectionId, roomId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+
+        await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} joined the room.");
         //todo: validate if room exists
         // assign connection to group
     }
 
     public async Task UnsubscribeRoomEvents(string roomId)
     {
-        Groups.Remove(Context.ConnectionId, roomId);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
+
         //todo: validate if room exists
         // assign connection to group
+
+        await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} left the room.");
     }
 
     public async Task MakeTurn(string roomId, int row, int column)
@@ -38,7 +44,12 @@ public class GameHub : Microsoft.AspNet.SignalR.Hub
             throw new NotImplementedException();
             //todo: response only to this connection
     }
-    //todo: create Event send function
-    // event notifier - create service wich implements IUpdater
-    // also need 
+
+    public Task SendGameEventAsync(string roomId, TicTacToeGameEvent gameEvent)
+    {
+        // event notifier - create service wich implements IUpdater
+        return Clients.Group(roomId).GameEvent(gameEvent);
+    }
+
+    private string GetCurrentUsername() => "username-mock";
 }

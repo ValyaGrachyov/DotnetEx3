@@ -1,10 +1,15 @@
 using System.Text;
+using DataAccess;
+using Domain.TicTacToe;
+using Features.GameManagment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Migrations;
 using TicacToe_Backend.Helpers.Extensions;
+using TicacToe_Backend.Hubs;
+using TicacToe_Backend.InfrastructureService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,9 +43,16 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+
+builder.Services.AddScoped<ITicTacToeGameEngine, GameEngine > ();
+builder.Services.AddScoped<IGameRoomRepository, GameRoomRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUpdateRecorder, GameEventBroadcaster>();
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -57,7 +69,7 @@ builder.Services.AddSwaggerGen(c =>
                     Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"                }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
@@ -88,10 +100,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapControllers();
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
+app.MapHub<GameHub>("game-hub");
 
 await TryMigrateDatabaseAsync(app);
 app.Run();
@@ -112,5 +125,4 @@ static async Task TryMigrateDatabaseAsync(WebApplication app)
         app.Logger.LogError(e, "Error while migrating the database");
         Environment.Exit(-1);
     }
-    
 }
