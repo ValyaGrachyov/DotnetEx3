@@ -4,7 +4,7 @@ import Header from "../Header";
 import API from "../../httpclient";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const getTokenFromSessionStorage = () => sessionStorage.getItem("token");
+export const getTokenFromSessionStorage = () => sessionStorage.getItem("token");
 
 const AuthContext = createContext();
 export const AuthData = () => useContext(AuthContext);
@@ -18,8 +18,6 @@ export const AuthWrapper = () => {
         return API.login(username, password)
         .then(() => setUser({...user, username: sessionStorage.getItem("username"), isAuthenticated: true}));
      }
-
-     const getToken = () => getTokenFromSessionStorage();
 
      const logout = () => {
           API.logout();
