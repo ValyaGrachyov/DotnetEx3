@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+
+  backend:
+    build:
+      context: ./TicTacToe_Backend
+      dockerfile: TicTacToeDockerfile
+    container_name: backend
+    environment:
+      - ConnectionStrings__DefaultConnection=${DEFAULT_CONNECTION}
+      - RabbitMqConfig__Username=tictactoe
+      - RabbitMqConfig__Password=Passw0rd
+      - RabbitMqConfig__Hostname=rabbitmq
+      - RabbitMqConfig__Port=5672
+
+  frontend:
+    build: 
+      context: ./tic-tac-toe-front
+      dockerfile: FrontDockerfile
+    container_name: frontend
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: TicTacToe
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "P@ssw0rd"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ../2. Init Database:/docker-entrypoint-initdb.d
+      - habrdb-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    volumes:
+      - dbdata6:/data/db
+    ports:
+      - "27017:27017"
+
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-alpine
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "tictactoe"
+      RABBITMQ_DEFAULT_PASS: "Passw0rd"
+
+volumes:
+  habrdb-data:
+  dbdata6:
