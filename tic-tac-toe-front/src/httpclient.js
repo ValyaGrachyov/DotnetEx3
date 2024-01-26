@@ -58,6 +58,17 @@ class AxiosWrapper {
             .catch(() => {});
         return isValidSession;
     }
+
+    async getrooms() {
+       const rooms = await this.axiosInstance.get("/rooms"); 
+       return rooms;       
+    }
+
+    async getUsersRaiting() {
+        const rates = await this.axiosInstance.get("/rate");
+        return rates;
+    }
+    
 }
 
 const API = new AxiosWrapper();
