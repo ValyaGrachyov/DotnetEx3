@@ -11,14 +11,14 @@ public class UserRepository : IUserRepository
     private readonly TicTacToeContext _ctx;
     private readonly IMongoCollection<UserRate> _collection;
 
-    public UserRepository( TicTacToeContext ctx, IMongoClient client, IOptions<GamesCollectionParams> settingsOptions)
+    public UserRepository( TicTacToeContext ctx, IMongoClient client, IOptions<RateCollectionParams> settingsOptions)
     {
         var settings = settingsOptions.Value;
         _collection = client.GetDatabase(settings.DatabaseName).GetCollection<UserRate>(settings.CollectionName);
         _ctx = ctx;
     }
 
-    public async Task<User> GetUserByIdAsync(string userId)
+    public async Task<User?> GetUserByIdAsync(string userId)
     {
         var user = await _ctx.Users.FindAsync(userId);
         var userRate = await GetUserRateByIdAsync(userId);

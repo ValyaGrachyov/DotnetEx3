@@ -1,9 +1,9 @@
 ﻿using Domain.TicTacToe.GameEvents;
-using Domain.UserStatistics;
 using Features.GameManagment.MakeTurn;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using TicacToe_Backend.Helpers.Extensions;
 
 namespace TicacToe_Backend.Hubs;
 
@@ -42,7 +42,7 @@ public class GameHub : Hub<IGameEventsReciever>
             return;
 
         var userId = GetCurrentUserId();
-        var makeTurnResult = await _mediator.Send(new MakeTurnCommand(roomId, userId, row, column));
+        var makeTurnResult = await _mediator.Send(new MakeTurnCommand(roomGuid, userId, row, column));
         if (!makeTurnResult.IsSuccess)
             await Clients.Client(Context.ConnectionId).GameEvent(new WrongArgumentEvent()
             {
@@ -60,7 +60,7 @@ public class GameHub : Hub<IGameEventsReciever>
         return Clients.Group(roomId).GameEvent(gameEvent);
     }
 
-    private string GetCurrentUsername() => Context.User.Claims.Skip(1).FirstOrDefault()!.Value;
+    private string GetCurrentUsername() => Context.User.GetUserUsername()!;
 
-    private string GetCurrentUserId() => Context.User.Claims.FirstOrDefault()!.Value;
+    private string GetCurrentUserId() => Context.User.GetUserId()!;
 }

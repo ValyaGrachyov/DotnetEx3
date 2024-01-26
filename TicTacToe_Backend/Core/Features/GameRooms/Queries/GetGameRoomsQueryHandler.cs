@@ -16,7 +16,7 @@ internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, IEnum
 
     public async Task<Result<IEnumerable<GameRoomDto>>> Handle(GetGameRoomsQuery request, CancellationToken cancellationToken)
     {
-        var rooms = await _gameRoomRepository.GetGameRooms();
+        var rooms = await _gameRoomRepository.GetGameRooms(request.Page, request.Limit);
         return new Ok<IEnumerable<GameRoomDto>>(rooms.Select(x => new GameRoomDto()
         {
             Id = x.Id.ToString(),

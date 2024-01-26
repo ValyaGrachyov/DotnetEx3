@@ -2,4 +2,4 @@
 
 namespace Features.GameManagment.JoinRoomCommand;
 
-public record JoinRoomCommand(string UserId, string RoomId) : ICommand;
+public record JoinRoomCommand(string UserId, Guid RoomId) : ICommand;
