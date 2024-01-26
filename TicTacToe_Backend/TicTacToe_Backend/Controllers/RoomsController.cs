@@ -23,7 +23,7 @@ public class RoomsController: ControllerBase
         _userRepository = userRepository;
     }
 
-    [HttpGet]
+    [HttpPost]
     public async Task<IActionResult> CreateRoom([FromBody] int maxRate )
     {
         var user = await _userRepository.GetUserByIdAsync(HttpContext.User.Claims.FirstOrDefault().Value);

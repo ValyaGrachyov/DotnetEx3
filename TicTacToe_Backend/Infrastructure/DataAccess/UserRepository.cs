@@ -23,12 +23,21 @@ public class UserRepository : IUserRepository
     {
         var user = await _ctx.Users.FindAsync(userId);
         var userRate = await GetUserRateByIdAsync(userId);
+        
+        
 
         if (user != null)
         {
-            user.Rate = userRate;
+            var newUser = new User()
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Rate = userRate
+            };            
+
+            return newUser;
         }
-        return user;
+        return null;
     }
 
     public Task UpdateuserRate(string userId, int updatedRate)
