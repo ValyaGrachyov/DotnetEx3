@@ -7,8 +7,7 @@ using TicacToe_Backend.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMetdiator();
-builder.Services.AddDataAccess(builder.Configuration);
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddJwtAuthorization(builder.Configuration);
 

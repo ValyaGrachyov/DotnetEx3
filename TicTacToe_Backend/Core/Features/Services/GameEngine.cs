@@ -2,11 +2,12 @@
 using Domain.TicTacToe.GameEvents;
 using DataAccess;
 
-namespace Features.GameManagment;
+namespace Features.Services;
 
 public class GameEngine : ITicTacToeGameEngine
 {
     private readonly IGameRoomRepository _gamesRepository;
+    private readonly IAwarder _awarder;
 
     public GameEngine(IGameRoomRepository gamesRepository)
     {
@@ -132,6 +133,9 @@ public class GameEngine : ITicTacToeGameEngine
                 RoomId = game.RoomId,
                 WinnerId = game.Winner == Winner.Player1 ? game.Player1.UserId : game.Player2.UserId,
             });
+
+            await _awarder.ChangeUserRateAsync(game.Winner == Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, 3);
+            await _awarder.ChangeUserRateAsync(game.Winner != Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, -3);
         }
         else if (NoTurnsLeft(game.GameField))
         {
@@ -162,13 +166,26 @@ public class GameEngine : ITicTacToeGameEngine
 
     public async Task<IEnumerable<TicTacToeGameEvent>> ExitRoomAsync(TicTacToeGameRoom room, string userId)
     {
+        var events = new List<TicTacToeGameEvent>();
+
+        if (room.CurrentGameState != TicTacToeRoomState.RestartCooldown || room.CurrentGameState != TicTacToeRoomState.WaitingForOpponent)
+        {
+            events.Add(new GameEndEvent()
+            {
+                RoomId = room.Id,
+                WinnerId = room.OpponentId == userId ? room.RoomCreatorId : room.OpponentId,
+                WinnerName = room.OpponentId == userId ? room.CreatorUserName : room.OpponentUserName,
+            });
+            await _awarder.ChangeUserRateAsync(userId, -3);
+        }
+
         if (room.RoomCreatorId == userId)
         {
             room.CurrentGameState = TicTacToeRoomState.WaitingForOpponent;
             room.OpponentId = null;
             room.OpponentUserName = null;
         }
-        else 
+        else
         {
             room.CurrentGameState = TicTacToeRoomState.Closed;
         }
@@ -176,9 +193,8 @@ public class GameEngine : ITicTacToeGameEngine
 
         await _gamesRepository.UpdateSessionAsync(room);
 
-        return new TicTacToeGameEvent[] 
+        return new TicTacToeGameEvent[]
         {
-            //todo: suspend game or finish game
         };
     }
 

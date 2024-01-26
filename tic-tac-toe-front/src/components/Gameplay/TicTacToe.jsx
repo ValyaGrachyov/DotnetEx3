@@ -201,7 +201,7 @@ function GameHubConnection({iAmPlayer}) {
 
   async function createHubConnection() {
     const con = new HubConnectionBuilder()
-      .withUrl("https://localhost:7240/game-hub" /*process.env.GAMEHUB*/, {
+      .withUrl(process.env.GAMEHUB, {
         accessTokenFactory: getTokenFromSessionStorage
       })
       .configureLogging(LogLevel.Information)
@@ -219,12 +219,9 @@ function GameHubConnection({iAmPlayer}) {
   }
 
   async function loadGameInfo() {
-    return "k0c0w";
+    const roomInfo = await API.getroom(roomId);
+    return roomInfo?.creatorUsername;
   }
-
-  useEffect(() => {
-
-  }, [mySymbol, tiles, player1, player2]);
 
   useEffect(() => {
     async function init() {
@@ -255,11 +252,5 @@ return(
   </>);
 }
 
-
-function Game ({connection}) {
-
-
-  return 
-}
 
 export default TicTacToe;

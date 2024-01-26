@@ -77,6 +77,14 @@ class AxiosWrapper {
        return rooms;       
     }
 
+    async getroom(id) {
+        const room = await this.axiosInstance.get(`/rooms/${id}`);
+        if (room.data)
+            return room.data.value;
+        return {roomId: id};
+    }
+
+
     async getUsersRaiting() {
         const rates = await this.axiosInstance.get("/rate");
         return rates;

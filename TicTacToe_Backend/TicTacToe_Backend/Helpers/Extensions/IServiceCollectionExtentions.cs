@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Features.Services;
+using MassTransit;
+using Microsoft.Extensions.Configuration;
 
 namespace TicacToe_Backend.Helpers.Extensions;
 
@@ -63,11 +65,27 @@ public static class ServiceCollectionExtentions
             .AddGamesRepository(configuration);
     }
 
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ITicTacToeGameEngine, GameEngine>();
         services.AddScoped<IUpdateRecorder, GameEventBroadcaster>();
 
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumers(Features.AssemblyReference.Assembly);
+
+            x.UsingRabbitMq((ctx, cfg) =>
+            {
+                cfg.Host(configuration
+                        .GetSection(RabbitMqConfig.SectionName)
+                        .Get<RabbitMqConfig>()!
+                        .FullHostname);
+                cfg.ConfigureEndpoints(ctx);
+            });
+        });
+
+        services.AddDataAccess(configuration);
+        services.AddScoped<IAwarder, RateUpdatePublisher>();
         return services;
     }
 

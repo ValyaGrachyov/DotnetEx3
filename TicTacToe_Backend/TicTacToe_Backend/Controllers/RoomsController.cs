@@ -42,25 +42,6 @@ public class RoomsController: ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetRoomsInfo([FromQuery]int page = 0, [FromQuery]int limit = 16)
     {
-        return Ok(new List<GameRoomDto>()
-        {
-            new GameRoomDto()
-            {
-                Id = "12345",
-                CreatedAtUtc = DateTime.Now,
-                CreatorUsername = "test",
-                MaxAllowedUserRating = 25,
-                IsBusy = false
-            },
-            new GameRoomDto()
-            {
-                Id = "09876",
-                CreatedAtUtc = DateTime.MinValue,
-                CreatorUsername = "player",
-                MaxAllowedUserRating = 10,
-                IsBusy = false
-            }
-        });
         var room = await _mediator.Send(new GetGameRoomsQuery());
         return new JsonResult(room);
     }
