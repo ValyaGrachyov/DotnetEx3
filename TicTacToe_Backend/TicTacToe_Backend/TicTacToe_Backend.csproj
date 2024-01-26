@@ -33,6 +33,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Core\Domain\Domain.csproj" />
       <ProjectReference Include="..\Core\Features\Features.csproj" />
+      <ProjectReference Include="..\Infrastructure\DataAccess\DataAccess.csproj" />
       <ProjectReference Include="..\Infrastructure\Migrations\Migrations.csproj" />
     </ItemGroup>
 

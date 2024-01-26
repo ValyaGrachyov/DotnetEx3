@@ -9,12 +9,19 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using TicacToe_Backend.Helpers.Authorization;
 using AssemblyReference = Features.AssemblyReference;
+using DataAccess.ServiceRegistration;
+using Domain.TicTacToe;
+using Features.GameManagment;
+using TicacToe_Backend.InfrastructureService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TicacToe_Backend.Helpers.Extensions;
 
 public static class ServiceCollectionExtentions
 {
-    public static IServiceCollection AddPostgres(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddPostgres(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<TicTacToeContext>(options =>
         {
@@ -23,7 +30,7 @@ public static class ServiceCollectionExtentions
         return services;
     }
 
-    public static IServiceCollection AddMongo(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddMongo(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(new MongoClient(configuration.GetSection("DB:Mongo:ConnectionString").Value));
         return services;
@@ -35,7 +42,7 @@ public static class ServiceCollectionExtentions
         return services;
     }
 
-    public static IServiceCollection AddIdentityWithJWT(this IServiceCollection services)
+    private static IServiceCollection AddIdentityWithJWT(this IServiceCollection services)
     {
         services.AddTransient<IJwtGenerator, JwtGenerator>();
         
@@ -43,6 +50,56 @@ public static class ServiceCollectionExtentions
             .AddEntityFrameworkStores<TicTacToeContext>()
             .AddDefaultTokenProviders();
         
+        return services;
+    }
+
+    public static IServiceCollection AddDataAccess(this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddPostgres(configuration)
+            .AddMongo(configuration);
+
+        return services.AddUserRepository()
+            .AddGamesRepository(configuration);
+    }
+
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    {
+        services.AddScoped<ITicTacToeGameEngine, GameEngine>();
+        services.AddScoped<IUpdateRecorder, GameEventBroadcaster>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddJwtAuthorization(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddIdentityWithJWT();
+
+        services.AddAuthentication(x =>
+        {
+            x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(x =>
+        {
+            x.SaveToken = true;
+
+            x.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidIssuer = configuration["JWT:Issuer"],
+                ValidAudience = configuration["JWT:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey
+                    (Encoding.UTF8.GetBytes(configuration["JWT:Key"]!)),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = true,
+                RequireExpirationTime = false
+            };
+        });
+
+        services.AddAuthorization();
+
         return services;
     }
 }

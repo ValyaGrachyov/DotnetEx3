@@ -2,7 +2,7 @@
 
 public class TicTacToeGame
 {
-    public string RoomId { get; init; }
+    public Guid RoomId { get; init; }
 
     public TicTacToeSymbols[] GameField { get; init; } = new TicTacToeSymbols[]
     {

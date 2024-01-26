@@ -2,7 +2,7 @@
 
 public class TicTacToeGameRoom
 {
-    public string RoomId { get; init; }
+    public Guid RoomId { get; init; }
 
     public int MaxAllowedPlayerRate { get; init; }
 

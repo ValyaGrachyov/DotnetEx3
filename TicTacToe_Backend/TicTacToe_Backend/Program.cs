@@ -1,55 +1,16 @@
-using System.Text;
-using DataAccess;
-using Domain.TicTacToe;
-using Features.GameManagment;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Migrations;
 using TicacToe_Backend.Helpers.Extensions;
 using TicacToe_Backend.Hubs;
-using TicacToe_Backend.InfrastructureService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddPostgres(builder.Configuration)
-                .AddMongo(builder.Configuration);
-
-builder.Services.AddIdentityWithJWT();
-
 builder.Services.AddMetdiator();
+builder.Services.AddDataAccess(builder.Configuration);
+builder.Services.AddInfrastructure();
 
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x =>
-{
-    x.SaveToken = true;   
-    
-    x.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey
-            (Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]!)),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = false,
-        ValidateIssuerSigningKey = true,
-        RequireExpirationTime = false
-    };
-});
-
-
-builder.Services.AddScoped<ITicTacToeGameEngine, GameEngine > ();
-builder.Services.AddScoped<IGameRoomRepository, GameRoomRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUpdateRecorder, GameEventBroadcaster>();
-
-builder.Services.AddAuthorization();
+builder.Services.AddJwtAuthorization(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
