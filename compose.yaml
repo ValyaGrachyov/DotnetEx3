@@ -8,8 +8,14 @@ services:
       dockerfile: TicTacToeDockerfile
     container_name: backend
 
+  frontend:
+    build: 
+      context: ./tic-tac-toe-front
+      dockerfile: FrontDockerfile
+    container_name: frontend
+
   postgres:
-    container_name: database
+    container_name: postgres
     image: postgres:latest
     environment:
       POSTGRES_DB: TicTacToe

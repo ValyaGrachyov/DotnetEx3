@@ -1,12 +1,7 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Domain.ViewModels;
-using MediatR;
+﻿using Domain.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using TicacToe_Backend.Helpers.Authorization;
 
 namespace TicacToe_Backend.Controllers;
@@ -16,21 +11,23 @@ namespace TicacToe_Backend.Controllers;
 public class AccountController: ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly SignInManager<IdentityUser> _signInManager;
     private readonly IJwtGenerator _jwtGenerator;
 
-    public AccountController(UserManager<IdentityUser> userManager, IJwtGenerator jwtGenerator)
+    public AccountController(UserManager<IdentityUser> userManager, IJwtGenerator jwtGenerator, SignInManager<IdentityUser> signInManager)
     {
         _userManager = userManager;
         _jwtGenerator = jwtGenerator;
+        _signInManager = signInManager;
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> GenerateToken(UserLoginVm vm)
+    public async Task<IActionResult> GenerateToken(UserRegisterVm vm)
     {
         var result = await _userManager.CreateAsync(new IdentityUser()
         {
            UserName = vm.UserName,
-        }, vm.Password);
+        }, vm.Password!);
 
         if (result.Succeeded)
         {
@@ -45,15 +42,22 @@ public class AccountController: ControllerBase
     public async Task<IActionResult> GetUser(UserRegisterVm vm)
     {
         
-        var user = await _userManager.FindByNameAsync(vm.UserName);
+        var user = await _userManager.FindByNameAsync(vm.UserName!);
 
         if (user == null)
         {
             return NotFound();
         }
+        
+        var checkPass = await _signInManager.CheckPasswordSignInAsync(user, vm.Password!, false);
+            
+        if (!checkPass.Succeeded)
+        {
+            return NotFound();
+        }
 
         var token = _jwtGenerator.CreateToken(user);
-
+        
         return Ok(token);
     }
 
