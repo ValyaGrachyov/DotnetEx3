@@ -11,11 +11,11 @@ using TicacToe_Backend.Helpers.Authorization;
 using AssemblyReference = Features.AssemblyReference;
 using DataAccess.ServiceRegistration;
 using Domain.TicTacToe;
-using Features.GameManagment;
 using TicacToe_Backend.InfrastructureService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Features.Services;
 
 namespace TicacToe_Backend.Helpers.Extensions;
 
