@@ -20,16 +20,25 @@ public class GameRoomRepository : IGameRoomRepository
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public Task UpdateRoomGameAsync(Guid roomId, TicTacToeGame game)
+    public async Task<IEnumerable<TicTacToeGameRoom>?> GetGameRooms()
+    {
+        var rooms = await _collection.FindAsync(x => true);
+
+        return rooms.ToEnumerable();
+    }
+        
+    
+
+    public async Task UpdateRoomGameAsync(Guid roomId, TicTacToeGame game)
     {
         var filter = Builders<TicTacToeGameRoom>.Filter.Eq(s => s.RoomId, roomId);
         var update = Builders<TicTacToeGameRoom>.Update
             .Set(s => s.CurrnetGame, game);
 
-        return _collection.UpdateOneAsync(filter, update);
+        await _collection.UpdateOneAsync(filter, update);
     }
 
-    public Task UpdateSessionAsync(TicTacToeGameRoom session)
+    public async Task UpdateSessionAsync(TicTacToeGameRoom session)
     {
         var filter = Builders<TicTacToeGameRoom>.Filter.Eq(s => s.RoomId, session.RoomId);
         var update = Builders<TicTacToeGameRoom>.Update
@@ -37,15 +46,34 @@ public class GameRoomRepository : IGameRoomRepository
             .Set(s => s.OpponentId, session.OpponentId)
             .Set(s => s.CurrentGameState, session.CurrentGameState);
         
-        return _collection.UpdateOneAsync(filter, update);
+        await _collection.UpdateOneAsync(filter, update);
     }
 
-    public Task UpdateSessionStatusAsync(Guid sessionId, TicTacToeRoomState state)
+    public async Task UpdateSessionStatusAsync(Guid sessionId, TicTacToeRoomState state)
     {
         var filter = Builders<TicTacToeGameRoom>.Filter.Eq(s => s.RoomId, sessionId);
         var update = Builders<TicTacToeGameRoom>.Update
             .Set(s => s.CurrentGameState, state);
 
-        return _collection.UpdateOneAsync(filter, update);
+        await _collection.UpdateOneAsync(filter, update);
+    }
+
+    public async Task<string> CreateRoom(int maxRate, string creatorId, string creatorUserName)
+    {
+        var gameRoom = new TicTacToeGameRoom()
+        {
+            RoomId = new Guid(),
+            CurrentGameState = TicTacToeRoomState.WaitingForOpponent,
+            RoomCreatorId = creatorId,
+            CreationDateTimeUtc = DateTime.Now.Date,
+            MaxAllowedPlayerRate = maxRate,
+            CreatorUserName = creatorUserName,
+            OpponentId = null,
+            CurrnetGame = null
+        };
+
+        await _collection.InsertOneAsync(gameRoom);
+
+        return gameRoom.RoomId.ToString();
     }
 }

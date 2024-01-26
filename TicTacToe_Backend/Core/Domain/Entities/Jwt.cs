@@ -2,5 +2,6 @@
 
 public class Jwt
 {
-    public string? Jwt_Token { get; set; }
+    public string? Token { get; set; }
+    public string? UserName { get; set; }
 }

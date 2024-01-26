@@ -1,7 +1,10 @@
-﻿using Domain.ViewModels;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Domain.Entities;
+using Domain.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using TicacToe_Backend.Helpers.Authorization;
 
 namespace TicacToe_Backend.Controllers;
@@ -26,7 +29,7 @@ public class AccountController: ControllerBase
     {
         var result = await _userManager.CreateAsync(new IdentityUser()
         {
-           UserName = vm.UserName,
+           UserName = vm.Username,
         }, vm.Password!);
 
         if (result.Succeeded)
@@ -42,7 +45,7 @@ public class AccountController: ControllerBase
     public async Task<IActionResult> GetUser(UserRegisterVm vm)
     {
         
-        var user = await _userManager.FindByNameAsync(vm.UserName!);
+        var user = await _userManager.FindByNameAsync(vm.Username!);
 
         if (user == null)
         {
@@ -58,15 +61,15 @@ public class AccountController: ControllerBase
 
         var token = _jwtGenerator.CreateToken(user);
         
-        return Ok(token);
+        return Ok(new Jwt()
+        {
+            Token = token,
+            UserName = vm.Username
+        });
     }
-
-    [Authorize]
-    [HttpGet("test")]
-    public IActionResult Test()
-    {
-        return Ok("Success");
-    }
+    
+    
+   
     
     
 

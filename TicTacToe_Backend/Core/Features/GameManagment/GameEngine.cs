@@ -163,15 +163,15 @@ public class GameEngine : ITicTacToeGameEngine
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<TicTacToeGameEvent>> JoinRoomAsync(TicTacToeGameRoom room, string userId)
+    public async Task<IEnumerable<TicTacToeGameEvent>> JoinRoomAsync(TicTacToeGameRoom room, string userId, string userName)
     {
         /* todo: validate in wrapper if (_session.RoomCreatorId == _applicantId)
             // case when user tries to join created room
             throw new ActionRefusedGameException();
         */
 
-        //todo: check if applicant rating is fit
         room.OpponentId = userId;
+        room.OpponentUserName = userName;
         await InitGameAsync(room);
         var game = room.CurrnetGame!;
         return new TicTacToeGameEvent[]

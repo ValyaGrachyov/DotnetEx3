@@ -92,8 +92,8 @@ public static class ServiceCollectionExtentions
                     (Encoding.UTF8.GetBytes(configuration["JWT:Key"]!)),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidateLifetime = false,
-                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = false,
                 RequireExpirationTime = false
             };
         });

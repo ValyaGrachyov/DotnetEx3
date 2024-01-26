@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Migrations;
 
-public class TicTacToeContext : IdentityDbContext
+public class TicTacToeContext : IdentityDbContext<User>
 {
     public TicTacToeContext(DbContextOptions<TicTacToeContext> options): base(options) 
     {
     }
+    
+    
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

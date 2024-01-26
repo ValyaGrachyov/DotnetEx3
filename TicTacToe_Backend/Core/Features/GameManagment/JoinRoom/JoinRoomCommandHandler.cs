@@ -10,11 +10,13 @@ public class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
     private readonly IGameRoomRepository _gameRoomRepository;
     private readonly ITicTacToeGameEngine _engine;
     private readonly IUpdateRecorder _gameEventNotifier;
+    private readonly IUserRepository _userRepository;
 
-    public JoinRoomCommandHandler(IGameRoomRepository gameRoomRepository, ITicTacToeGameEngine engine)
+    public JoinRoomCommandHandler(IGameRoomRepository gameRoomRepository, ITicTacToeGameEngine engine, IUserRepository userRepository)
     {
         _gameRoomRepository = gameRoomRepository;
         _engine = engine;
+        _userRepository = userRepository;
     }
 
     public async Task<Result> Handle(JoinRoomCommand request, CancellationToken cancellationToken)
@@ -35,16 +37,22 @@ public class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
         //todo: check for user max rating and reject if not satisfy
         try
         {
+            var user = await _userRepository.GetUserByIdAsync(request.UserId);
+            if (user == null || user.Rate < room.MaxAllowedPlayerRate)
+            {
+                return Result.ErrorResult;
+            }
+            
+            var events = await _engine.JoinRoomAsync(room, request.UserId, user.UserName );
+            foreach (var gameEvent in events)
+                await _gameEventNotifier.RecordUpdateAsync(gameEvent);
 
+            return Result.SuccessResult;
         }
         catch (Exception ex)
         {
-
+            return Result.ErrorResult;
         }
-        var events = await _engine.JoinRoomAsync(room, request.UserId);
-        foreach (var gameEvent in events)
-            await _gameEventNotifier.RecordUpdateAsync(gameEvent);
-
-        return Result.SuccessResult;
+        
     }
 }

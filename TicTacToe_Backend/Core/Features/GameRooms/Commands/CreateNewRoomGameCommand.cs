@@ -2,4 +2,4 @@
 
 namespace Features.Games.Commands;
 
-public record CreateNewRoomGameCommand(int MaxUserRating) : ICommand<string>;
+public record CreateNewRoomGameCommand(int MaxUserRating, string CreatorId, string CreatorUserName) : ICommand<string>;
