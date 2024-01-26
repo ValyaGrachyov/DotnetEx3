@@ -22,10 +22,7 @@ public class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
 
     public async Task<Result> Handle(JoinRoomCommand request, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(request.RoomId, out var roomId))
-            return Result.ErrorResult;
-
-        var room = await _gameRoomRepository.GetGameRoomByIdAsync(roomId);
+        var room = await _gameRoomRepository.GetGameRoomByIdAsync(request.RoomId);
         if (room == null)
             return Result.ErrorResult;
 

@@ -1,6 +1,5 @@
-﻿using Domain.TicTacToe;
-using Shared.CQRS;
+﻿using Shared.CQRS;
 
 namespace Features.GameManagment.MakeTurn;
 
-public record MakeTurnCommand(string RoomId, string UserId, int Row, int Column) : ICommand;
+public record MakeTurnCommand(Guid RoomId, string UserId, int Row, int Column) : ICommand;

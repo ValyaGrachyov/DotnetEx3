@@ -16,8 +16,7 @@ public class GetGameRoomQueryHandler : IQueryHandler<GetGameRoomQuery, GameRoomD
 
     public async Task<Result<GameRoomDto>> Handle(GetGameRoomQuery request, CancellationToken cancellationToken)
     {
-        Guid roomId = Guid.Parse(request.RoomId);
-        var room = await _gameRoomRepository.GetGameRoomByIdAsync(roomId);
+        var room = await _gameRoomRepository.GetGameRoomByIdAsync(request.RoomId);
 
         if (room == null) return new Error<GameRoomDto>();
 

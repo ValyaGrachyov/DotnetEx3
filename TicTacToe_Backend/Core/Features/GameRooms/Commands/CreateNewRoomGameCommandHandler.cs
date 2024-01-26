@@ -5,7 +5,7 @@ using Shared.Results;
 
 namespace Features.GameRooms.Commands;
 
-public class CreateNewRoomGameCommandHandler : ICommandHandler<CreateNewRoomGameCommand, string>
+public class CreateNewRoomGameCommandHandler : ICommandHandler<CreateNewRoomGameCommand, Guid>
 {
 
     private readonly IGameRoomRepository _gameRoomRepository;
@@ -16,9 +16,9 @@ public class CreateNewRoomGameCommandHandler : ICommandHandler<CreateNewRoomGame
         _gameRoomRepository = gameRoomRepository;
     }
 
-    public async Task<Result<string>> Handle(CreateNewRoomGameCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateNewRoomGameCommand request, CancellationToken cancellationToken)
     {
-       var roomId = await _gameRoomRepository.CreateRoom(request.MaxUserRating, request.CreatorId, request.CreatorUserName);
-       return new Ok<string>(roomId);
+       var roomId = await _gameRoomRepository.AddRoomAsync(request.MaxUserRating, request.CreatorId, request.CreatorUserName);
+       return new Ok<Guid>(roomId);
     }
 }

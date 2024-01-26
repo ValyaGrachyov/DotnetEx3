@@ -135,7 +135,7 @@ public class GameEngine : ITicTacToeGameEngine
             });
 
             await _awarder.ChangeUserRateAsync(game.Winner == Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, 3);
-            await _awarder.ChangeUserRateAsync(game.Winner != Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, -3);
+            await _awarder.ChangeUserRateAsync(game.Winner != Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, -1);
         }
         else if (NoTurnsLeft(game.GameField))
         {

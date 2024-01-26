@@ -3,9 +3,7 @@ using System.Reflection.Metadata;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Migrations;
-using Features;
 using MongoDB.Driver;
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using TicacToe_Backend.Helpers.Authorization;
 using AssemblyReference = Features.AssemblyReference;
@@ -21,7 +19,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace TicacToe_Backend.Helpers.Extensions;
 
-public static class ServiceCollectionExtentions
+public static class ServiceCollectionExtensions
 {
     private static IServiceCollection AddPostgres(this IServiceCollection services, IConfiguration configuration)
     {
@@ -61,7 +59,7 @@ public static class ServiceCollectionExtentions
             .AddPostgres(configuration)
             .AddMongo(configuration);
 
-        return services.AddUserRepository()
+        return services.AddUserRepository(configuration)
             .AddGamesRepository(configuration);
     }
 
