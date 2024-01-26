@@ -73,12 +73,12 @@ class AxiosWrapper {
     }
 
     async getrooms() {
-       const rooms = await this.axiosInstance.get("/rooms"); 
+       const rooms = await this.axiosInstance.get("/games"); 
        return rooms;       
     }
 
     async getroom(id) {
-        const room = await this.axiosInstance.get(`/rooms/${id}`);
+        const room = await this.axiosInstance.get(`/games/${id}`);
         if (room.data)
             return room.data.value;
         return {roomId: id};

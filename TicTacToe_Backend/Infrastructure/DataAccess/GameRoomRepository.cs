@@ -23,8 +23,9 @@ public class GameRoomRepository : IGameRoomRepository
 
     public async Task<IEnumerable<TicTacToeGameRoom>?> GetGameRooms(int page, int limit)
     {
+        
         var filter = Builders<TicTacToeGameRoom>.Filter.Where(x => true);
-
+        
         var data = await _collection.Find(filter)
             .SortByDescending(x => x.CreationDateTimeUtc)
             .ThenByDescending(x => x.CurrentGameState)

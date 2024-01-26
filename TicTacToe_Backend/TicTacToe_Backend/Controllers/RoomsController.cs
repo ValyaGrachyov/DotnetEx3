@@ -47,7 +47,7 @@ public class RoomsController: ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetRoomsInfo([FromQuery]int page = 0, [FromQuery]int limit = 16)
+    public async Task<IActionResult> GetRoomsInfo([FromQuery]int page = 1, [FromQuery]int limit = 16)
     {
         if (page < 0 || limit == 0)
         {
