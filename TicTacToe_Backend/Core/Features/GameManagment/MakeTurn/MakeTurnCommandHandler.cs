@@ -19,7 +19,10 @@ public class MakeTurnCommandHandler : ICommandHandler<MakeTurnCommand>
 
     public async Task<Result> Handle(MakeTurnCommand request, CancellationToken cancellationToken)
     {
-        var room = await _gameRoomRepository.GetGameRoomByIdAsync(request.RoomId);
+        if (!Guid.TryParse(request.RoomId, out var roomId))
+            return Result.ErrorResult;
+
+        var room = await _gameRoomRepository.GetGameRoomByIdAsync(roomId);
         if (room == null)
             return Result.ErrorResult;
 

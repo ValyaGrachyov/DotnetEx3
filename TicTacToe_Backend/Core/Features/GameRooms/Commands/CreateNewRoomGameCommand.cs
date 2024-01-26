@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Shared.CQRS;
+﻿using Shared.CQRS;
 
 namespace Features.Games.Commands;
 

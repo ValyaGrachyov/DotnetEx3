@@ -32,7 +32,7 @@ public static class ServiceCollectionExtentions
 
     private static IServiceCollection AddMongo(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton(new MongoClient(configuration.GetSection("DB:Mongo:ConnectionString").Value));
+        services.AddSingleton<IMongoClient>(new MongoClient(configuration.GetSection("DB:Mongo:ConnectionString").Value));
         return services;
     }
 

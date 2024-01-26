@@ -19,6 +19,6 @@ public class GameEventBroadcaster : IUpdateRecorder
     {
         //preproccess events and then drop them into hub
 
-        return _hubContext.Clients.Group(update.RoomId).GameEvent(update);
+        return _hubContext.Clients.Group(update.RoomId.ToString()).GameEvent(update);
     }
 }

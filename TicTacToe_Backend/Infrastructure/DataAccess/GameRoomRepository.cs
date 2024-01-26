@@ -7,7 +7,6 @@ public class GameRoomRepository : IGameRoomRepository
 {
     private readonly IMongoCollection<TicTacToeGameRoom> _collection;
 
-
     public GameRoomRepository(IMongoClient client, IOptions<GamesCollectionParams> settingsOptions)
     {
         var settings = settingsOptions.Value;
