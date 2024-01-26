@@ -46,9 +46,6 @@ function TicTacToe() {
   );
 }
 
-function 
-
-
 function GameHubConnection({iAmPlayer}) {
   const navigate = useNavigate();
 
