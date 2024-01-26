@@ -5,13 +5,12 @@ using Features.Games.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace TicacToe_Backend.Controllers;
 
 [ApiController]
 [Route("/rooms")]
-//[Authorize]
+[Authorize]
 public class RoomsController: ControllerBase
 {
     private readonly IMediator _mediator;
@@ -24,7 +23,7 @@ public class RoomsController: ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateRoom([FromBody] int maxRate )
+    public async Task<IActionResult> CreateRoom([FromBody] int maxRate)
     {
         var user = await _userRepository.GetUserByIdAsync(HttpContext.User.Claims.FirstOrDefault().Value);
         var result = await _mediator.Send(new CreateNewRoomGameCommand(maxRate,
@@ -37,7 +36,7 @@ public class RoomsController: ControllerBase
     public async Task<IActionResult> GetRoomInfo([FromRoute]string id)
     {
         var room = await _mediator.Send(new GetGameRoomQuery(id));
-        return Ok(new JsonResult(room.Value));
+        return new JsonResult(room.Value);
     }
     
     [HttpGet]
@@ -63,7 +62,7 @@ public class RoomsController: ControllerBase
             }
         });
         var room = await _mediator.Send(new GetGameRoomsQuery());
-        return Ok(new JsonResult(room));
+        return new JsonResult(room);
     }
 
     [HttpPost("{id}/join")]
