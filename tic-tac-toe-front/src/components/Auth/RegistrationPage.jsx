@@ -39,7 +39,7 @@ export default function RegistrationPage () {
             await API.register(formData.username, formData.password);
             navigate("/login");
         } catch (error) {
-            setErrorMessage(error);
+            setErrorMessage(error.message);
         }
    }
 

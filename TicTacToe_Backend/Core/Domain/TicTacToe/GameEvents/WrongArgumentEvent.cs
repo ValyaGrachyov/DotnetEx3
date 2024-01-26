@@ -7,6 +7,8 @@ namespace Domain.TicTacToe.GameEvents
 
         public string ApplicantId { get; init; }
 
+        public string ApplicantName { get; init; }
+
         public TicTacToeRoomState GameState { get; init; }
 
         public int Row { get; init; }

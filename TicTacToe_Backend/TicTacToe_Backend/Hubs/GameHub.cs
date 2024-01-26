@@ -19,11 +19,26 @@ public class GameHub : Hub<IGameEventsReciever>
 
     public async Task SubscribeRoomEvents(string roomId)
     {
+        //todo: validate if room exists
+
+
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
 
         await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} joined the room.");
-        //todo: validate if room exists
-        // assign connection to group
+        await Clients.Group(roomId).GameEvent(new NewGameStartEvent()
+        {
+            Player1 = new Domain.TicTacToe.TicTacToePlayer()
+            {
+                Symbol = Domain.TicTacToe.TicTacToeSymbols.X,
+                UserName = "moonkjo",
+            },
+            Player2 = new Domain.TicTacToe.TicTacToePlayer()
+            {
+                Symbol = Domain.TicTacToe.TicTacToeSymbols.O,
+                UserName = "sdfs",
+            },
+            IsPlayer1Turn = true
+        });
     }
 
     public async Task UnsubscribeRoomEvents(string roomId)
@@ -38,7 +53,7 @@ public class GameHub : Hub<IGameEventsReciever>
 
     public async Task MakeTurn(string roomId, int row, int column)
     {
-        var userId = "someId";
+        var userId = GetCurrentUserId();
         var makeTurnResult = await _mediator.Send(new MakeTurnCommand(roomId, userId, row, column));
         if (!makeTurnResult.IsSuccess)
             throw new NotImplementedException();
@@ -51,5 +66,7 @@ public class GameHub : Hub<IGameEventsReciever>
         return Clients.Group(roomId).GameEvent(gameEvent);
     }
 
-    private string GetCurrentUsername() => "username-mock";
+    private string GetCurrentUsername() => Context.User.Claims.Skip(1).FirstOrDefault()!.Value;
+
+    private string GetCurrentUserId() => Context.User.Claims.FirstOrDefault()!.Value;
 }

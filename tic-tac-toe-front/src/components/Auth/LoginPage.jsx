@@ -17,7 +17,7 @@ function validateFields({username, password}) {
 export default function LoginPage () {
     const navigate = useNavigate();
     const { user, login } = AuthData();
-    const [ formData, setFormData ] = useReducer((formData, newItem) => { return ( {...formData, ...newItem} )}, {username: null, password: null});
+    const [ formData, setFormData ] = useReducer((formData, newItem) => { return ( {...formData, ...newItem} )}, {username: "", password: ""});
     const [ errorMessage, setErrorMessage ] = useState(null);
 
     const executeLogin = async () => {
@@ -28,11 +28,11 @@ export default function LoginPage () {
                 return;
             }
 
-            await login(formData.userName, formData.password);
+            await login(formData.username, formData.password);
             navigate("/games");
 
         } catch (error) {
-             setErrorMessage(error);
+             setErrorMessage(error?.message);
         }
    }
 
@@ -43,6 +43,7 @@ export default function LoginPage () {
 
     return (
     <div className="form-holder">
+        <h2>Sign Into Account</h2>
         <div className="inputs">
             <div className="input">
                 <input type="text" maxLength="256" minLength="6" placeholder="username" required={true}

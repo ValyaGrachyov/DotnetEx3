@@ -1,29 +1,32 @@
+import { AuthData } from "../Auth/AuthWrapper";
 import GameState from "./GameState";
 
-function GameStatusTitle({ gameState }) {
+function GameStatusTitle({ gameState, winnerNickName }) {
+  const {user} = AuthData();
   let message = null;
-
-  switch (gameState) {
-    case GameState.iWin:
-        message = "You won game!";
-        break;
-    case GameState.opponentWins:
-        message = "Opponent won game!";
-        break;
-    case GameState.myTurn:
+    if (gameState == GameState.noBodyWins)
+    {
+        message = "Nobody wins!";
+    }
+    
+    if (winnerNickName) {
+        message = `${winnerNickName} won game!`
+    }
+    
+    if (GameState.myTurn)
+    {
         message = "Your turn.";
-        break;
-    case GameState.opponentTurn:
+    }
+    if (GameState.opponentTurn)
+    {
         message = "Opponent`s turn.";
-        break;
-    case GameState.inProgress:
-        message = "You are watching the game.";
-        break;
-    default:
-        break;
+    }
+    if (GameState.inProgress)
+    {
+        message = "You are watching the game."
+    }
 
-  }
-  return message == null ? <></> : <div className="game-over">{message}</div>; 
+  return message ? <></> : <div className="game-over">{message}</div>; 
 }
 
 export default GameStatusTitle;

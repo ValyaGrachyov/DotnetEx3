@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.UserStatistics;
 using Microsoft.Extensions.Options;
 using Migrations;
@@ -10,7 +10,6 @@ public class UserRepository : IUserRepository
 {
     private readonly TicTacToeContext _ctx;
     private readonly IMongoCollection<UserRate> _collection;
-
 
     public UserRepository( TicTacToeContext ctx, IMongoClient client, IOptions<GamesCollectionParams> settingsOptions)
     {
