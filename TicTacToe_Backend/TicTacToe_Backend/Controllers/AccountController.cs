@@ -1,10 +1,19 @@
-﻿using Domain.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 using TicacToe_Backend.Helpers.Authorization;
 
 namespace TicacToe_Backend.Controllers;
+
+public class UserCredits
+{
+    [JsonPropertyName("username")]
+    public string UserName { get; set; }
+
+    [JsonPropertyName("password")]
+    public string Password { get; set; }
+}
 
 [Route("account")]
 [ApiController]
@@ -22,53 +31,45 @@ public class AccountController: ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> GenerateToken(UserRegisterVm vm)
+    public async Task<IActionResult> RegisterUserAsync([FromBody] UserCredits credits)
     {
         var result = await _userManager.CreateAsync(new IdentityUser()
         {
-           UserName = vm.UserName,
-        }, vm.Password!);
+           UserName= credits.UserName,
+        }, credits.Password);
 
         if (result.Succeeded)
         {
-           return Ok("Created");
+           return Ok();
         }
 
-        return BadRequest();
+        return BadRequest(result.Errors.FirstOrDefault()?.Description);
     }
     
     
     [HttpPost("login")]
-    public async Task<IActionResult> GetUser(UserRegisterVm vm)
+    public async Task<IActionResult> LoginUserAsync([FromBody] UserCredits credits)
     {
-        
-        var user = await _userManager.FindByNameAsync(vm.UserName!);
+        var user = await _userManager.FindByNameAsync(credits.UserName);
 
         if (user == null)
         {
             return NotFound();
         }
         
-        var checkPass = await _signInManager.CheckPasswordSignInAsync(user, vm.Password!, false);
+        var checkPass = await _signInManager.CheckPasswordSignInAsync(user, credits.Password, false);
             
         if (!checkPass.Succeeded)
         {
-            return NotFound();
+            return Unauthorized();
         }
 
         var token = _jwtGenerator.CreateToken(user);
         
-        return Ok(token);
+        return new JsonResult(new { username=user.UserName, token});
     }
 
     [Authorize]
-    [HttpGet("test")]
-    public IActionResult Test()
-    {
-        return Ok("Success");
-    }
-    
-    
-
-    
+    [HttpGet("token/check")]
+    public IActionResult TestToken() => Ok();
 }

@@ -7,7 +7,7 @@ function throwError(err) {
 }
 
 class AxiosWrapper {
-    constructor(url = process.env.BACKEND_ORIGIN) {
+    constructor(url = "https://localhost:7240") {
         const options = {
             baseURL: url,
             timeout: 10000,
@@ -29,8 +29,10 @@ class AxiosWrapper {
     async login(username, password) {
         let userInfo = {token: null, username: null};
         await this.axiosInstance.post("/account/login", {username: username, password: password})
-        .then(response => userInfo = response.data )
-        .catch(err => throwError(err));
+        .then(response =>
+             userInfo = response.data )
+        .catch(err => 
+            throwError(err));
 
         sessionStorage.setItem("token", userInfo.token);
         sessionStorage.setItem("username", userInfo.username);
@@ -44,8 +46,17 @@ class AxiosWrapper {
     }
 
     async logout() {
-        sessionStorage.setItem("token", null);
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("username");
         this.axiosInstance.defaults.headers["Authorization"] = '';
+    }
+
+    async testSession() {
+        let isValidSession = false;
+        await this.axiosInstance.get("/account/token/check")
+            .then(() => {isValidSession = true})
+            .catch(() => {});
+        return isValidSession;
     }
 }
 
