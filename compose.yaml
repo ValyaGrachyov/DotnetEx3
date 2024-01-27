@@ -8,6 +8,10 @@ services:
       dockerfile: TicTacToeDockerfile
     container_name: backend
     environment:
+      - ASPNETCORE_URLS=https://+443;http://+80
+      - ASPNETCORE_HTTPS_PORT="443"
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password12345
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMqConfig__Username=tictactoe
       - RabbitMqConfig__Password=Passw0rd
@@ -18,7 +22,7 @@ services:
       - mongo
       - rabbitmq
     ports:
-      - "5028:80"
+      - "81:443"
 
   frontend:
     build: 
