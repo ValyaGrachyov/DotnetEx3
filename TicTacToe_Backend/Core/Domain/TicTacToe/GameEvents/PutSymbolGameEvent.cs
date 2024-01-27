@@ -4,7 +4,7 @@ public class PutSymbolGameEvent : TicTacToeGameEvent
 {
     public string UserId { get; init; }
 
-    public string UserName { get; init; }
+    public string Username { get; init; }
 
     public int Row { get; init; }
 

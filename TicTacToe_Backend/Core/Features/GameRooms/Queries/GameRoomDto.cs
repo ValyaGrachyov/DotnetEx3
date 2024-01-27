@@ -6,9 +6,13 @@ public record GameRoomDto
 
     public string CreatorUsername { get; init; }
 
+    public string? OpponentUsername { get; init; }
+
     public DateTime CreatedAtUtc { get; init; }
 
     public bool IsBusy { get; init; }
 
     public int MaxAllowedUserRating { get; init; }
+
+    public GameDto? CurrentGame { get; init; }
 }

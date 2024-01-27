@@ -1,11 +1,18 @@
-import GameState from "./GameState";
+import { useNavigate, useParams } from "react-router";
+import API from "../../httpclient";
 
-function ExitGameButton({ gameState, onReset }) {
-  if (gameState === GameState.inProgress) {
-    return;
+function ExitGameButton({ iAmPlayer }) {
+  const {roomId} = useParams();
+  const navigate = useNavigate();
+
+  async function exit() {
+    if (iAmPlayer)
+      API.exitRoom(roomId);
+    navigate("/games");
   }
+
   return (
-    <button onClick={onReset} className="exit-button">
+    <button onClick={() => exit()} className="exit-button">
       Exit Game
     </button>
   );

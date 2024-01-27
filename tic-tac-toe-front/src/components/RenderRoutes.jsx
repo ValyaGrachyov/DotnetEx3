@@ -2,6 +2,7 @@ import { Route, Routes, Link } from "react-router-dom";
 import routesList from "./navigation"; 
 import { AuthData } from "./Auth/AuthWrapper";
 import { useLocation } from "react-router-dom";
+import "../css/navigation.css"
 
 export const RenderRoutes = () => {
     const { user } = AuthData();

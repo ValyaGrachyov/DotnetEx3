@@ -17,13 +17,43 @@ internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, IEnum
     public async Task<Result<IEnumerable<GameRoomDto>>> Handle(GetGameRoomsQuery request, CancellationToken cancellationToken)
     {
         var rooms = await _gameRoomRepository.GetGameRooms(request.Page, request.Limit);
-        return new Ok<IEnumerable<GameRoomDto>>(rooms.Select(x => new GameRoomDto()
+        return new Ok<IEnumerable<GameRoomDto>>(rooms.Select(x =>
         {
-            Id = x.Id.ToString(),
-            CreatorUsername = x.CreatorUserName,
-            IsBusy = x.CurrentGameState != TicTacToeRoomState.WaitingForOpponent,
-            CreatedAtUtc = x.CreationDateTimeUtc,
-            MaxAllowedUserRating = x.MaxAllowedPlayerRate
+            var game = x.CurrnetGame;
+            GameDto? dto;
+            if (game != null)
+            {
+                dto = new GameDto()
+                {
+                    GameField = game.GameField,
+                    IsPlayer1Turn = game.IsPlayer1Turn,
+                    Player1 = new PlayerDto()
+                    {
+                        Symbol = game.Player1.Symbol,
+                        Username = game.Player1.Username,
+                    },
+                    Player2 = new PlayerDto()
+                    {
+                        Symbol = game.Player2.Symbol,
+                        Username = game.Player2.Username,
+                    },
+                };
+            }
+            else
+            {
+                dto = default(GameDto?);
+            }
+
+            return new GameRoomDto()
+            {
+                Id = x.Id.ToString(),
+                CreatorUsername = x.CreatorUserName,
+                OpponentUsername = x.OpponentUserName,
+                IsBusy = x.CurrentGameState != TicTacToeRoomState.WaitingForOpponent,
+                CreatedAtUtc = x.CreationDateTimeUtc,
+                MaxAllowedUserRating = x.MaxAllowedPlayerRate,
+                CurrentGame = dto
+            };
         }));
     }
 }

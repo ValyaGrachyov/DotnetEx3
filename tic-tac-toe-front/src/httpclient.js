@@ -62,7 +62,7 @@ class AxiosWrapper {
     async joinRoom(roomId) {
         let joinResult = false;
         
-        await this.axiosInstance.post(`/rooms/${roomId}/join`)
+        await this.axiosInstance.post(`/games/${roomId}/join`)
             .then(() => {joinResult = true})
             .catch((err) => {
                 if (err.data)
@@ -72,16 +72,23 @@ class AxiosWrapper {
         return joinResult;
     }
 
+    async exitRoom(roomId) {
+        try {
+            await this.axiosInstance.post(`/games/${roomId}/exit`);
+        }
+        catch{
+
+        }
+    }
+
     async getrooms() {
-       const rooms = await this.axiosInstance.get("/rooms"); 
+       const rooms = await this.axiosInstance.get("/games"); 
        return rooms;       
     }
 
     async getroom(id) {
-        const room = await this.axiosInstance.get(`/rooms/${id}`);
-        if (room.data)
-            return room.data.value;
-        return {roomId: id};
+        const roomRequest = await this.axiosInstance.get(`/games/${id}`);
+        return roomRequest.data;
     }
 
 

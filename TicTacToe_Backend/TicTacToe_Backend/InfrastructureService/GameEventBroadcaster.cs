@@ -15,10 +15,10 @@ public class GameEventBroadcaster : IUpdateRecorder
         _hubContext = hubContext;
     }
 
-    public Task RecordUpdateAsync(TicTacToeGameEvent update)
+    public async Task RecordUpdateAsync(TicTacToeGameEvent update)
     {
-        //preproccess events and then drop them into hub
-
-        return _hubContext.Clients.Group(update.RoomId.ToString()).GameEvent(update);
+        if (update is NewGameStartEvent)
+            await _hubContext.Clients.Group(update.RoomId.ToString()).RoomMessage("SERVER", "Starting the game.");
+        await _hubContext.Clients.Group(update.RoomId.ToString()).GameEvent(update);
     }
 }

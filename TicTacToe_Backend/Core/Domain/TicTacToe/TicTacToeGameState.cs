@@ -6,5 +6,5 @@ public enum TicTacToeRoomState
     Closed,
     Started,
     Loading,
-    RestartCooldown
+    Finished
 }

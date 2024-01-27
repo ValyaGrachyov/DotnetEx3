@@ -19,8 +19,6 @@ public class GameHub : Hub<IGameEventsReciever>
 
     public async Task SubscribeRoomEvents(string roomId)
     {
-        //todo: validate if room exists
-
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
 
         await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} joined the room.");
@@ -29,9 +27,6 @@ public class GameHub : Hub<IGameEventsReciever>
     public async Task UnsubscribeRoomEvents(string roomId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-
-        //todo: validate if room exists
-        // assign connection to group
 
         await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} left the room.");
     }
@@ -54,10 +49,9 @@ public class GameHub : Hub<IGameEventsReciever>
             });
     }
 
-    public Task SendGameEventAsync(string roomId, TicTacToeGameEvent gameEvent)
+    public Task SendRoomMessage(string roomId, string message)
     {
-        // event notifier - create service wich implements IUpdater
-        return Clients.Group(roomId).GameEvent(gameEvent);
+        return Clients.Group(roomId).RoomMessage(GetCurrentUsername(), message);
     }
 
     private string GetCurrentUsername() => Context.User.GetUserUsername()!;
