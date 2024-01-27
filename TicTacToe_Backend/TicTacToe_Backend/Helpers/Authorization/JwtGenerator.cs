@@ -31,7 +31,7 @@ public class JwtGenerator: IJwtGenerator
                 new Claim("UserName", user.UserName),
             }),
             
-            Expires = DateTime.Now.AddMinutes(1),
+            Expires = DateTime.Now.AddHours(1),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256)
         };
