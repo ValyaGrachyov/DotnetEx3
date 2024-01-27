@@ -56,7 +56,7 @@ public class MakeTurnCommandHandler : ICommandHandler<MakeTurnCommand>
     private async Task AfterWinAsync(TicTacToeGameRoom room)
     {
         await _gameRoomRepository.UpdateSessionStatusAsync(room.Id, TicTacToeRoomState.Finished);
-        await Task.Delay(10);
+        await Task.Delay(TimeSpan.FromSeconds(10));
         room = await _gameRoomRepository.GetGameRoomByIdAsync(room.Id);
 
         if (room != null && room.CurrentGameState == TicTacToeRoomState.Finished)

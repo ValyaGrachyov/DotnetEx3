@@ -8,7 +8,6 @@ import NotFoundPage from "./NotFoundPage";
 import GamesPage from "./Games/GamesPage";
 
 export const routesList = [
-    { path: "/games/:roomId", name: "The Game", element: <TicTacToe/>, isNavigationBar: false, isPrivate: true },
     //private nav bar items
     { path: "/games", name: "Games List", element: <GamesPage/>, isNavigationBar: true, isPrivate: true },
     { path: "/leader-board", name: "Leader Board", element: <LeaderBoardPage/>, isNavigationBar: true,  isPrivate: true },

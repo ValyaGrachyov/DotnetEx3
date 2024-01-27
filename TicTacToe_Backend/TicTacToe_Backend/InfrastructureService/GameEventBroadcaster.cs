@@ -17,8 +17,25 @@ public class GameEventBroadcaster : IUpdateRecorder
 
     public async Task RecordUpdateAsync(TicTacToeGameEvent update)
     {
-        if (update is NewGameStartEvent)
-            await _hubContext.Clients.Group(update.RoomId.ToString()).RoomMessage("SERVER", "Starting the game.");
+        await CommentEventAsync(update as dynamic);
+        
         await _hubContext.Clients.Group(update.RoomId.ToString()).GameEvent(update);
+    }
+
+    private Task CommentEventAsync(NewGameStartEvent update)
+    {
+        return _hubContext.Clients.Group(update.RoomId.ToString()).RoomMessage("SERVER", "Starting the game.");
+    }
+
+    private Task CommentEventAsync(GameEndEvent update)
+    {
+        string message = string.Format("{0} won. Restaring after 10s.", update.WinnerName ?? "Nobody");
+        return _hubContext.Clients.Group(update.RoomId.ToString()).RoomMessage("SERVER", message);
+    }
+
+    //Fall lBack
+    private Task CommentEventAsync(TicTacToeGameEvent update)
+    {
+        return Task.CompletedTask;
     }
 }

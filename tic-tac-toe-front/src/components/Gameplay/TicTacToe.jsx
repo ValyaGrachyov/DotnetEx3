@@ -36,9 +36,8 @@ const winningCombinations = [
   { combo: [2, 4, 6], strikeClass: "strike-diagonal-2" },
 ];
 
-function Game ({iAmPlayer}) {
+function Game ({roomId, iAmPlayer}) {
   const navigate = useNavigate();
-  const { roomId } = useParams();
   const { user } = AuthData();
 
   const [connection, setConnection] = useState(null);
@@ -235,10 +234,10 @@ function Game ({iAmPlayer}) {
   </div>
 }
 
-function TicTacToe({iAmPlayer = true}) {
+function TicTacToe({roomId, iAmPlayer}) {
   return (
     <section>
-      <Game iAmPlayer={iAmPlayer}/>
+      <Game roomId={roomId} iAmPlayer={iAmPlayer}/>
       <ExitGameButton iAmPlayer={iAmPlayer}/>
     </section>
   );
