@@ -10,6 +10,7 @@ public class GameEngine : ITicTacToeGameEngine
     private readonly IGameRoomRepository _gamesRepository;
     private readonly IAwarder _awarder;
 
+
     public GameEngine(IGameRoomRepository gamesRepository, IAwarder awarder)
     {
         _gamesRepository = gamesRepository;
@@ -209,7 +210,6 @@ public class GameEngine : ITicTacToeGameEngine
                 });
             }
         }
-
         var punishmentTask = gameWasRunning ? _awarder.ChangeUserRateAsync(userId, -3) : Task.CompletedTask;
         await Task.WhenAll(_gamesRepository.UpdateSessionAsync(room), punishmentTask);
 

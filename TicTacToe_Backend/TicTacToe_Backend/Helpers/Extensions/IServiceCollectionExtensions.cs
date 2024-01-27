@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using System.Reflection.Metadata;
-using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Migrations;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Features.Services;
 using MassTransit;
-using Microsoft.Extensions.Configuration;
 
 namespace TicacToe_Backend.Helpers.Extensions;
 

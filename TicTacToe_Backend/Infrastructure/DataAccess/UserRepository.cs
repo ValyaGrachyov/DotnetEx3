@@ -39,8 +39,6 @@ public class UserRepository : IUserRepository
         return null;
     }
     
-    
-    
     public async Task<IEnumerable<UserRate>> GetUsersRate()
     {
         var filter = Builders<UserRate>.Filter.Where(x => true);

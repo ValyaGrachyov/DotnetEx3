@@ -94,7 +94,7 @@ function Game ({roomId, iAmPlayer, onClose}) {
         }
 
         const newConnection = new HubConnectionBuilder()
-                    .withUrl('https://localhost:7240/game-hub',{
+                    .withUrl('https://localhost:81/game-hub',{
                       accessTokenFactory: getTokenFromSessionStorage
                     })
                     .configureLogging(LogLevel.Information)

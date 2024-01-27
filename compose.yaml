@@ -21,6 +21,7 @@ services:
       - postgres
       - mongo
       - rabbitmq
+    restart: always
     ports:
       - "81:443"
 
@@ -41,7 +42,7 @@ services:
       POSTGRES_PASSWORD: "P@ssw0rd"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     ports:
-      - "5433:5432"
+      - "5432:5432"
 
   mongo:
     container_name: mongo

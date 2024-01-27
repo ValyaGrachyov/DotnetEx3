@@ -6,9 +6,9 @@ namespace Features.Services
 {
     public class RateUpdatePublisher : IAwarder
     {
-        private readonly IPublishEndpoint _bus;
+        private readonly IBus _bus;
 
-        public RateUpdatePublisher(IPublishEndpoint bus)
+        public RateUpdatePublisher(IBus bus)
         {
             _bus = bus;
         }
