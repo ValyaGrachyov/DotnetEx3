@@ -1,55 +1,96 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import API from "../../httpclient";
 import TicTacToe from "../Gameplay/TicTacToe";
+import InfinityScroll from "./InfinityScroll";
+import "../../css/rooms.css"
+import { Link, Navigate } from "react-router-dom";
+import LeaderBoardPage from "../LeaderBoard/LeaderBoardPage";
+import { AuthData } from "../Auth/AuthWrapper";
+
+const RoomListElement = ({roomInfo, index, onJoinClick, onWatchClick}) => <>
+    <div key={index} className="room-list-elem">
+        <div className="room-list-elem-number">{index+1}</div>
+        <div className="room-list-elem-creator">{roomInfo.creatorUsername}</div>
+        <div className="room-list-elem-creationDate">{new Date(roomInfo.createdAtUtc).toISOString().slice(0, 16).replace('T', ' ')}</div>
+        <div className="room-list-elem-roomStage">{roomInfo.isBusy ? "in progress" : "waiting for opponent"}</div>
+        <div>{`Max rate: ${roomInfo.maxAllowedUserRating}`}</div>
+        <button className="room-list-elem-joinButton" onClick={() => {onJoinClick(roomInfo.id)}} >join</button>
+        <button className="room-list-elem-joinButton watch" onClick={() => {onWatchClick(roomInfo.id)}}>watch</button>
+    </div>
+</>
 
 function RoomList({selectRoom}) {
-    const navigate = useNavigate();
-    const [rooms, SetRooms] = useState([]);
-
-    async function loadRooms() {
-        
-            const res = await API.getrooms();
-            SetRooms(res.data);
+    const elementsPerPage = 10;
+    
+    function loadRoomInfos(page) {
+        return API.getrooms(page, elementsPerPage)
+            .then(response => { return {newData: response.requestedRooms, totalCount: response.totalRooms}; });
     }
 
-    useEffect(() => {
-        loadRooms();
-    },[])    
+    const onJoinClick = (roomId) => selectRoom(roomId, true);
 
-    
-    return <>
-            <div>
-                <button onClick={() => {navigate("/leader-board")}} >Общий рейтинг</button>    
-                        
-                <div style={{border:20}}>
-                    {rooms.map((x) =>    
-                        <div >
-                            <p>Creator {x.creatorUsername}</p>
-                            <p>Creation Date {x.createdAtUtc}</p>
-                            <p>Game Id {x.id}</p>
-                            <button onClick={() => selectRoom(x.id, true)}>Join</button>
-                            <button onClick={() => selectRoom(x.id, false)}>Watch</button>
-                        </div>                                            
-                    )}
-                </div>
+    const onWatchClick = (roomId) => selectRoom(roomId, false);
+
+    return (
+            <div className="room-list">       
+                <InfinityScroll
+                    elementsPerPage={elementsPerPage}
+                    demandAdditionData={loadRoomInfos}
+                    mapDisplayData={(roomInfo, key) => 
+                        RoomListElement({roomInfo:roomInfo, index: key, onJoinClick: onJoinClick, onWatchClick: onWatchClick})}
+                 />
             </div>
-        </>;
+        );
 }
 
 
 function GamesPage() {
+    const { user } = AuthData();
     const [selectedRoom, setSelectedRoom] = useState();
     const [iAmPlayer, setIAmPlayer] = useState(false);
+    const [leadersPageOpen, setLeadersPageOpen] = useState(false);
+    const [gameCreationPageOpen, setGameCreationPageOpen] = useState(false);
+    const [refresh, setRefresh] = useState(false);
 
     const selectGame = (gameId, wannaPlay) => {
         setSelectedRoom(gameId);
         setIAmPlayer(wannaPlay);
     };
 
+    const onExitRoom = () => {
+        setSelectedRoom();
+    }
+
+    const closeGameCreationPage = () => setGameCreationPageOpen(false);
+
+    const refreshClick = () => { setRefresh(x => !x) }
+
     return <>
-    {selectedRoom && <TicTacToe roomId={selectedRoom} iAmPlayer={iAmPlayer} />}
-    {!selectedRoom && <RoomList selectRoom={selectGame}/>}
+        {!user.isAuthenticated && <Navigate to="/login"/> }
+        {user.isAuthenticated && 
+          <>
+             <div className="buttnos-holder">
+                <button onClick={() => setLeadersPageOpen(prev => !prev)}>
+                    {leadersPageOpen ? <>Close Leader Board</> : <>Open Leader Board</>}
+                </button>
+                {!leadersPageOpen && !gameCreationPageOpen && <button onClick={refreshClick}>Refresh Games</button>}
+                {!leadersPageOpen && !gameCreationPageOpen && <button onClick={() => setGameCreationPageOpen(true)}>Create A Game</button>}
+             </div>
+             {
+                 !leadersPageOpen && 
+                 <>
+                    {  gameCreationPageOpen && <></>}
+                    { !gameCreationPageOpen && 
+                        <>
+                            {selectedRoom && <TicTacToe roomId={selectedRoom} onExitRoom={onExitRoom} iAmPlayer={iAmPlayer} />}
+                            {!selectedRoom && (refresh || !refresh) && <RoomList selectRoom={selectGame}/>}
+                        </>
+                    }
+                 </>
+             }
+             {leadersPageOpen && <LeaderBoardPage />}
+         </>
+        }
     </>
 }
 

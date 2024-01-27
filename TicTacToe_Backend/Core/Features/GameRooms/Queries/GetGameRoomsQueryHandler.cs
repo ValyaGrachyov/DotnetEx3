@@ -5,7 +5,7 @@ using Shared.Results;
 
 namespace Features.GameRooms.Queries;
 
-internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, IEnumerable<GameRoomDto>>
+internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, PaginatedGameRoomsInfoDto>
 {
     private readonly IGameRoomRepository _gameRoomRepository;
 
@@ -14,46 +14,63 @@ internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, IEnum
         _gameRoomRepository = gameRoomRepository;
     }
 
-    public async Task<Result<IEnumerable<GameRoomDto>>> Handle(GetGameRoomsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedGameRoomsInfoDto>> Handle(GetGameRoomsQuery request, CancellationToken cancellationToken)
     {
-        var rooms = await _gameRoomRepository.GetGameRooms(request.Page, request.Limit);
-        return new Ok<IEnumerable<GameRoomDto>>(rooms.Select(x =>
+        try
         {
-            var game = x.CurrnetGame;
-            GameDto? dto;
-            if (game != null)
+            var roomsTask = _gameRoomRepository.GetGameRooms(request.Page, request.Limit);
+            var totalCountTask = _gameRoomRepository.GetGameRoomsCountAsync();
+            await Task.WhenAll(roomsTask, totalCountTask);
+            
+            var roomInfos = roomsTask!.Result!.Select(x =>
             {
-                dto = new GameDto()
+                var game = x.CurrnetGame;
+                GameDto? dto;
+                if (game != null)
                 {
-                    GameField = game.GameField,
-                    IsPlayer1Turn = game.IsPlayer1Turn,
-                    Player1 = new PlayerDto()
+                    dto = new GameDto()
                     {
-                        Symbol = game.Player1.Symbol,
-                        Username = game.Player1.Username,
-                    },
-                    Player2 = new PlayerDto()
-                    {
-                        Symbol = game.Player2.Symbol,
-                        Username = game.Player2.Username,
-                    },
-                };
-            }
-            else
-            {
-                dto = default(GameDto?);
-            }
+                        GameField = game.GameField,
+                        IsPlayer1Turn = game.IsPlayer1Turn,
+                        Player1 = new PlayerDto()
+                        {
+                            Symbol = game.Player1.Symbol,
+                            Username = game.Player1.Username,
+                        },
+                        Player2 = new PlayerDto()
+                        {
+                            Symbol = game.Player2.Symbol,
+                            Username = game.Player2.Username,
+                        },
+                    };
+                }
+                else
+                {
+                    dto = default(GameDto?);
+                }
 
-            return new GameRoomDto()
+                return new GameRoomDto()
+                {
+                    Id = x.Id.ToString(),
+                    CreatorUsername = x.CreatorUserName,
+                    OpponentUsername = x.OpponentUserName,
+                    IsBusy = x.CurrentGameState != TicTacToeRoomState.WaitingForOpponent,
+                    CreatedAtUtc = x.CreationDateTimeUtc,
+                    MaxAllowedUserRating = x.MaxAllowedPlayerRate,
+                    CurrentGame = dto
+                };
+            });
+
+            return new Ok<PaginatedGameRoomsInfoDto>(new PaginatedGameRoomsInfoDto()
             {
-                Id = x.Id.ToString(),
-                CreatorUsername = x.CreatorUserName,
-                OpponentUsername = x.OpponentUserName,
-                IsBusy = x.CurrentGameState != TicTacToeRoomState.WaitingForOpponent,
-                CreatedAtUtc = x.CreationDateTimeUtc,
-                MaxAllowedUserRating = x.MaxAllowedPlayerRate,
-                CurrentGame = dto
-            };
-        }));
+                RequestedRooms = roomInfos,
+                TotalRooms = totalCountTask.Result
+            });
+
+        }
+        catch
+        {
+            return new Error<PaginatedGameRoomsInfoDto>();
+        }
     }
 }

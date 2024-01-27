@@ -90,4 +90,9 @@ public class GameRoomRepository : IGameRoomRepository
         var filter = Builders<TicTacToeGameRoom>.Filter.Eq(x => x.Id, id);
         return _collection.FindOneAndDeleteAsync(filter);
     }
+
+    public Task<long> GetGameRoomsCountAsync()
+    {
+        return _collection.EstimatedDocumentCountAsync();
+    }
 }

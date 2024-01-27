@@ -17,4 +17,6 @@ public interface IGameRoomRepository
     public Task<Guid> AddRoomAsync(int maxRate, string creatorId, string creatorUserName);
 
     public Task RemoveRoomGameByIdAsync(Guid id);
+
+    public Task<long> GetGameRoomsCountAsync();
 }

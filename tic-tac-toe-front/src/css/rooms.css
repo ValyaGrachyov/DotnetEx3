@@ -1,0 +1,39 @@
+.room-list {
+    margin-top: 20px;
+    padding: 0 5px;
+    color: white;
+    border-radius: 3px;
+}
+
+
+.room-list-elem {
+    background-color: #2eb52e;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    min-height: 75px;
+    align-items: center;
+    padding: 0 7px;
+    margin-bottom: 10px;
+}
+
+.room-list-elem-joinButton {
+    width: 100px;
+    height: 50px;
+    border-radius: 5px;
+    border: none;
+    background-color: #62e567;
+    color: white;
+    box-shadow: 1px 4px 8px 0px rgb(91 137 120 / 80%);
+}
+
+.room-list-elem-joinButton:hover {
+    background-color: #40b143;
+}
+
+.room-list-elem-joinButton.watch {
+    background-color: #9aac9a;
+}
+.room-list-elem-joinButton.watch:hover {
+    background-color: #788278;
+}

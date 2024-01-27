@@ -4,13 +4,12 @@ import API from "../../httpclient";
 
 function LeaderBoardPage() {
 
-    const navigate = useNavigate();
-    const [rates, SetRates] = useState([]);
+    const [rates, setRates] = useState([]);
 
     async function loadRates() {
         
             var res = await API.getUsersRaiting();
-            SetRates(res.data.value);
+            setRates(res.data.value);
             console.log(rates);
     }
 
@@ -20,7 +19,6 @@ function LeaderBoardPage() {
 
     return (
         <div>
-            <button onClick={() => {navigate("/games")}}>К выбору комнат</button>
             <p>Таблица лидеров:</p>
             {rates.map((el) => 
             <div>

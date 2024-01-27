@@ -81,8 +81,15 @@ class AxiosWrapper {
         }
     }
 
-    async getrooms() {
-       const rooms = await this.axiosInstance.get("/games"); 
+    async getrooms(page, limit) {
+       const rooms = await this.axiosInstance.get(`/games?page=${page}&limit=${limit}`)
+       .then(response => response.data)
+       .catch(err => {
+        if (err.status == 401)
+            document.location.href = "/login";
+
+        throw err;
+       }); 
        return rooms;       
     }
 

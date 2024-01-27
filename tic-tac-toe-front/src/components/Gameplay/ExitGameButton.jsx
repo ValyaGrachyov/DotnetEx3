@@ -1,14 +1,13 @@
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import API from "../../httpclient";
 
-function ExitGameButton({ iAmPlayer }) {
+function ExitGameButton({ iAmPlayer, onExit }) {
   const {roomId} = useParams();
-  const navigate = useNavigate();
 
   async function exit() {
     if (iAmPlayer)
       API.exitRoom(roomId);
-    navigate("/games");
+    onExit();
   }
 
   return (

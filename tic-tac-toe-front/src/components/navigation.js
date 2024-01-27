@@ -2,7 +2,6 @@ import React from "react"
 import LoginPage from "./Auth/LoginPage";
 import Logout from "./Auth/Logout";
 import RegistrationPage from "./Auth/RegistrationPage";
-import TicTacToe from "./Gameplay/TicTacToe"
 import LeaderBoardPage from "./LeaderBoard/LeaderBoardPage";
 import NotFoundPage from "./NotFoundPage";
 import GamesPage from "./Games/GamesPage";

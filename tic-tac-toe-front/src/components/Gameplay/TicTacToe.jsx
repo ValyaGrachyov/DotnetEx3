@@ -1,10 +1,10 @@
 import { useState, useEffect, } from "react";
 import Board from "./Board";
 import ExitGameButton from "./ExitGameButton"
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { HubConnectionBuilder, LogLevel, HubConnectionState } from "@microsoft/signalr";
 import { AuthData, getTokenFromSessionStorage } from "../Auth/AuthWrapper";
 import ChatForm from "./ChatForm";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import API from "../../httpclient";
 import "../../css/gameplay.css"
 
@@ -119,7 +119,14 @@ function Game ({roomId, iAmPlayer}) {
 
   useEffect(() => {
       if (!connection)
-        return;        
+        return;      
+
+      if (connection.state === HubConnectionState.Disconnected) {
+          connection.start()
+              .catch((e) => {
+                  console.log(e)
+              })
+      }
       connection.off('GameEvent');
       connection.off("RoomMessage");
       connection.on('GameEvent', event => proccessGameEvent(event));
@@ -146,6 +153,8 @@ function Game ({roomId, iAmPlayer}) {
         break;
       case "RoomWasClosedGameEvent":
         proccessGameClose(event);
+        break;
+      default:
         break;
     }
 
@@ -234,11 +243,11 @@ function Game ({roomId, iAmPlayer}) {
   </div>
 }
 
-function TicTacToe({roomId, iAmPlayer}) {
+function TicTacToe({roomId, iAmPlayer, onExitRoom}) {
   return (
     <section>
       <Game roomId={roomId} iAmPlayer={iAmPlayer}/>
-      <ExitGameButton iAmPlayer={iAmPlayer}/>
+      <ExitGameButton onExit={onExitRoom} iAmPlayer={iAmPlayer}/>
     </section>
   );
 }
