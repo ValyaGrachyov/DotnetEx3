@@ -21,10 +21,10 @@ public class GameRoomRepository : IGameRoomRepository
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<TicTacToeGameRoom>?> GetGameRooms(int page, int limit)
+    public async Task<IEnumerable<TicTacToeGameRoom>?> GetActiveGameRoomsAsync(int page, int limit)
     {
         
-        var filter = Builders<TicTacToeGameRoom>.Filter.Where(x => true);
+        var filter = Builders<TicTacToeGameRoom>.Filter.Where(x => x.CurrentGameState != TicTacToeRoomState.Closed);
         
         var data = await _collection.Find(filter)
             .SortByDescending(x => x.CreationDateTimeUtc)

@@ -36,7 +36,7 @@ const winningCombinations = [
   { combo: [2, 4, 6], strikeClass: "strike-diagonal-2" },
 ];
 
-function Game ({roomId, iAmPlayer}) {
+function Game ({roomId, iAmPlayer, onClose}) {
   const navigate = useNavigate();
   const { user } = AuthData();
 
@@ -108,7 +108,13 @@ function Game ({roomId, iAmPlayer}) {
         const myUsername = user.username;
         if (iAmPlayer && roomInfo.creatorUsername !== myUsername 
           && roomInfo.opponentUsername !== myUsername && !roomInfo.isBusy)
-          await API.joinRoom(roomId);
+          await API.joinRoom(roomId)
+            .catch(err => {
+              if (err.response && err.response.status === 400) {
+                alert(err.response.data ?? "Can not join room.");
+                onClose();
+              }
+            });
       }
       catch(err) {
         navigate("/games");
@@ -225,8 +231,10 @@ function Game ({roomId, iAmPlayer}) {
     }
 
     function proccessGameClose(event) {
-      if (event.roomId == roomId)
-        navigate("/games");
+      if (event.roomId == roomId) {
+        alert("Room was closed.");
+        onClose();
+      }
     }
   }
   
@@ -244,10 +252,18 @@ function Game ({roomId, iAmPlayer}) {
 }
 
 function TicTacToe({roomId, iAmPlayer, onExitRoom}) {
+
+  const onExit = () => {
+    if (iAmPlayer)
+      API.exitRoom(roomId)
+      .catch(err => console.log(err));
+    onExitRoom();
+  };
+
   return (
     <section>
-      <Game roomId={roomId} iAmPlayer={iAmPlayer}/>
-      <ExitGameButton onExit={onExitRoom} iAmPlayer={iAmPlayer}/>
+      <Game roomId={roomId} iAmPlayer={iAmPlayer} onClose={onExit}/>
+      <ExitGameButton onExit={onExit}/>
     </section>
   );
 }

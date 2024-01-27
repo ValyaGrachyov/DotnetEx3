@@ -20,15 +20,11 @@ public class GameHub : Hub<IGameEventsReciever>
     public async Task SubscribeRoomEvents(string roomId)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-
-        await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} joined the room.");
     }
 
     public async Task UnsubscribeRoomEvents(string roomId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-
-        await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} left the room.");
     }
 
     public async Task MakeTurn(string roomId, int row, int column)

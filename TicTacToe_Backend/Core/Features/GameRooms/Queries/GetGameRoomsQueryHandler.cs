@@ -18,7 +18,7 @@ internal class GetGameRoomsQueryHandler : IQueryHandler<GetGameRoomsQuery, Pagin
     {
         try
         {
-            var roomsTask = _gameRoomRepository.GetGameRooms(request.Page, request.Limit);
+            var roomsTask = _gameRoomRepository.GetActiveGameRoomsAsync(request.Page, request.Limit);
             var totalCountTask = _gameRoomRepository.GetGameRoomsCountAsync();
             await Task.WhenAll(roomsTask, totalCountTask);
             

@@ -1,12 +1,7 @@
-import { useParams } from "react-router";
 import API from "../../httpclient";
 
-function ExitGameButton({ iAmPlayer, onExit }) {
-  const {roomId} = useParams();
-
+function ExitGameButton({ onExit }) {
   async function exit() {
-    if (iAmPlayer)
-      API.exitRoom(roomId);
     onExit();
   }
 

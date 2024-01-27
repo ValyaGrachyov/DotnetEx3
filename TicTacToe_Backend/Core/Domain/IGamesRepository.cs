@@ -6,7 +6,7 @@ public interface IGameRoomRepository
 {
     public Task<TicTacToeGameRoom?> GetGameRoomByIdAsync(Guid sessionId);
 
-    public Task<IEnumerable<TicTacToeGameRoom>?> GetGameRooms(int page, int limit);
+    public Task<IEnumerable<TicTacToeGameRoom>?> GetActiveGameRoomsAsync(int page, int limit);
 
     public Task UpdateSessionStatusAsync(Guid sessionId, TicTacToeRoomState state);
 

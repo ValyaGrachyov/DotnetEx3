@@ -32,22 +32,24 @@ public class JoinRoomCommandHandler : ICommandHandler<JoinRoomCommand>
         if (room.CurrentGameState != TicTacToeRoomState.WaitingForOpponent)
             return Result.ErrorResult;
 
-        //todo: check for user max rating and reject if not satisfy
         try
         {
             var user = await _userRepository.GetUserByIdAsync(request.UserId);
-            if (user == null || user.Rate >= room.MaxAllowedPlayerRate)
-            {
+            if (user == null)
                 return Result.ErrorResult;
+
+            if (user.Rate >= room.MaxAllowedPlayerRate)
+            {
+                return new Error("Your rate is too big.");
             }
             
-            var events = await _engine.JoinRoomAsync(room, request.UserId, user.UserName );
+            var events = await _engine.JoinRoomAsync(room, request.UserId, user.UserName!);
             foreach (var gameEvent in events)
                 await _gameEventNotifier.RecordUpdateAsync(gameEvent);
 
             return Result.SuccessResult;
         }
-        catch (Exception ex)
+        catch
         {
             return Result.ErrorResult;
         }

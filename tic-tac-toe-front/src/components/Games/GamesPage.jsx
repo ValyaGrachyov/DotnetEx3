@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import API from "../../httpclient";
 import TicTacToe from "../Gameplay/TicTacToe";
 import InfinityScroll from "./InfinityScroll";
 import "../../css/rooms.css"
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import LeaderBoardPage from "../LeaderBoard/LeaderBoardPage";
 import { AuthData } from "../Auth/AuthWrapper";
 
@@ -11,6 +11,7 @@ const RoomListElement = ({roomInfo, index, onJoinClick, onWatchClick}) => <>
     <div key={index} className="room-list-elem">
         <div className="room-list-elem-number">{index+1}</div>
         <div className="room-list-elem-creator">{roomInfo.creatorUsername}</div>
+        <div>{roomInfo.id}</div>
         <div className="room-list-elem-creationDate">{new Date(roomInfo.createdAtUtc).toISOString().slice(0, 16).replace('T', ' ')}</div>
         <div className="room-list-elem-roomStage">{roomInfo.isBusy ? "in progress" : "waiting for opponent"}</div>
         <div>{`Max rate: ${roomInfo.maxAllowedUserRating}`}</div>
@@ -46,11 +47,10 @@ function RoomList({selectRoom}) {
 
 function GamesPage() {
     const { user } = AuthData();
-    const [selectedRoom, setSelectedRoom] = useState();
+    const [selectedRoom, setSelectedRoom] = useState(null);
     const [iAmPlayer, setIAmPlayer] = useState(false);
     const [leadersPageOpen, setLeadersPageOpen] = useState(false);
     const [gameCreationPageOpen, setGameCreationPageOpen] = useState(false);
-    const [refresh, setRefresh] = useState(false);
 
     const selectGame = (gameId, wannaPlay) => {
         setSelectedRoom(gameId);
@@ -58,23 +58,24 @@ function GamesPage() {
     };
 
     const onExitRoom = () => {
-        setSelectedRoom();
+        setSelectedRoom(null);
+        setIAmPlayer(false);
+        setGameCreationPageOpen(false);
+        setLeadersPageOpen(false);
     }
 
     const closeGameCreationPage = () => setGameCreationPageOpen(false);
-
-    const refreshClick = () => { setRefresh(x => !x) }
 
     return <>
         {!user.isAuthenticated && <Navigate to="/login"/> }
         {user.isAuthenticated && 
           <>
              <div className="buttnos-holder">
-                <button onClick={() => setLeadersPageOpen(prev => !prev)}>
-                    {leadersPageOpen ? <>Close Leader Board</> : <>Open Leader Board</>}
-                </button>
-                {!leadersPageOpen && !gameCreationPageOpen && <button onClick={refreshClick}>Refresh Games</button>}
-                {!leadersPageOpen && !gameCreationPageOpen && <button onClick={() => setGameCreationPageOpen(true)}>Create A Game</button>}
+                <div className="leader-board-holder" onClick={() => setLeadersPageOpen(prev => !prev)}>
+                    <img width="32" height="32" src="https://img.icons8.com/pastel-glyph/64/40C057/statistic-file--v1.png" alt={leadersPageOpen ? "Close Leader Board" : "Open Leader Board"}/>
+                    {!leadersPageOpen && !gameCreationPageOpen && !selectedRoom && 
+                    <img onClick={() => setGameCreationPageOpen(true)} width="32" height="32" src="https://img.icons8.com/pulsar-line/32/40C057/filled-plus-2-math.png" alt="Create A Game"/>}
+                </div>
              </div>
              {
                  !leadersPageOpen && 
@@ -83,7 +84,7 @@ function GamesPage() {
                     { !gameCreationPageOpen && 
                         <>
                             {selectedRoom && <TicTacToe roomId={selectedRoom} onExitRoom={onExitRoom} iAmPlayer={iAmPlayer} />}
-                            {!selectedRoom && (refresh || !refresh) && <RoomList selectRoom={selectGame}/>}
+                            {!selectedRoom && <RoomList selectRoom={selectGame}/>}
                         </>
                     }
                  </>

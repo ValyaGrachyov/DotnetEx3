@@ -1,7 +1,6 @@
 ﻿using DataAccess;
 using Domain.TicTacToe;
 using Domain.TicTacToe.Exceptions;
-using Domain.TicTacToe.GameEvents;
 using Shared.CQRS;
 using Shared.Results;
 
@@ -69,8 +68,6 @@ public class MakeTurnCommandHandler : ICommandHandler<MakeTurnCommand>
             }
             catch(ActionRefusedGameException)
             {
-                await _gameRoomRepository.UpdateSessionStatusAsync(room.Id, TicTacToeRoomState.Closed);
-                await _gameEventNotifier.RecordUpdateAsync(new RoomWasClosedGameEvent() { RoomId = room.Id });
             }
         }
     }

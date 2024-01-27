@@ -3,8 +3,8 @@
 public enum TicTacToeRoomState
 {
     WaitingForOpponent,
-    Closed,
-    Started,
+    Finished,
     Loading,
-    Finished
+    Started,
+    Closed,
 }
