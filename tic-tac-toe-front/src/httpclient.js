@@ -7,7 +7,7 @@ function throwError(err) {
 }
 
 class AxiosWrapper {
-    constructor(url = "https://localhost:7240") {
+    constructor(url = "http://localhost:5028") {
         const options = {
             baseURL: url,
             timeout: 10000,
