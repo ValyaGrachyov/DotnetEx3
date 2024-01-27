@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import InfinityScroll from "./InfinityScroll";
 import API from "../../httpclient";
 
 function GamesPage() {
@@ -14,16 +13,9 @@ function GamesPage() {
             SetRooms(res.data);
     }
 
-
-
     useEffect(() => {
         loadRooms();
-    },[])
-
-    const onClick = (roomId) => {
-
-        navigate(`/games/${roomId}`);
-    }
+    },[])    
 
     
     return <>

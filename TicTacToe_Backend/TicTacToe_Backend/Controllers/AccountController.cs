@@ -44,7 +44,7 @@ public class AccountController: ControllerBase
         if (result.Succeeded)
         {
             var id = await _userManager.FindByNameAsync(credits.UserName);
-            await _repository.UpdateUserRateAsync(id.Id, 0);
+            await _repository.CreateUser(id.Id, id.UserName);
            return Ok();
         }
 

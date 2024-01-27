@@ -38,6 +38,32 @@ public class UserRepository : IUserRepository
         }
         return null;
     }
+    
+    
+    
+    public async Task<IEnumerable<UserRate>> GetUsersRate()
+    {
+        var filter = Builders<UserRate>.Filter.Where(x => true);
+
+        var data = await _collection.Find(filter)
+            .SortByDescending(x => x.Rate)
+            .ToListAsync();
+
+        return data;
+    }
+
+    public async Task CreateUser(string id, string username)
+    {
+        var newUserRate = new UserRate()
+        {
+            Id = new Guid(),
+            UserId = id,
+            Username = username,
+            Rate = 0
+        };
+
+        await _collection.InsertOneAsync(newUserRate);
+    }
 
     public Task UpdateUserRateAsync(string userId, int updatedRate)
     {
@@ -47,6 +73,9 @@ public class UserRepository : IUserRepository
 
         return  _collection.UpdateOneAsync(filter, update);
     }
+
+    
+
 
     public async Task<int> GetUserRateByIdAsync(string userId)
     {
