@@ -2,6 +2,7 @@ import { useState } from "react";
 import API from "../../httpclient";
 import TicTacToe from "../Gameplay/TicTacToe";
 import InfinityScroll from "./InfinityScroll";
+import CreateGame from "./CreateGame";
 import "../../css/rooms.css"
 import { Navigate } from "react-router-dom";
 import LeaderBoardPage from "../LeaderBoard/LeaderBoardPage";
@@ -80,7 +81,7 @@ function GamesPage() {
              {
                  !leadersPageOpen && 
                  <>
-                    {  gameCreationPageOpen && <></>}
+                    {  gameCreationPageOpen && <CreateGame closeGameCreationPage={closeGameCreationPage} setSelectedRoom={setSelectedRoom}/>}
                     { !gameCreationPageOpen && 
                         <>
                             {selectedRoom && <TicTacToe roomId={selectedRoom} onExitRoom={onExitRoom} iAmPlayer={iAmPlayer} />}

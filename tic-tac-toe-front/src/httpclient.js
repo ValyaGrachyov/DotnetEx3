@@ -98,11 +98,18 @@ class AxiosWrapper {
         return roomRequest.data;
     }
 
+    async createroom(data) {
+        const roomId = await this.axiosInstance.post(`/games`, data);
+        return roomId;
+    }
+
 
     async getUsersRaiting() {
         const rates = await this.axiosInstance.get("/rate");
         return rates;
     }
+
+    
 }
 
 const API = new AxiosWrapper();
