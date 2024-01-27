@@ -1,48 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function InfinityScroll(mapData, demandData, displayableElementsCount, onError) {
-    const [currentPage, setCurrentPage] = useState(0);
+export default function InfinityScroll({mapDisplayData, demandAdditionData, elementsPerPage}) {
     const [data, setData] = useState([]);
-    const dataHolderRef = useRef(null);
-    const [elementHeight, setElementHeight] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [fetching, setFetching] = useState(true);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await demandData(currentPage, displayableElementsCount * 2);
-                // todo: preprocess data and make sure there are requested data counts
-                const data = response;
-                setData(pre => [...pre, ...data]);
+    const scrollHandler = (e) => {
+        const targetDocumentElement = e.target.documentElement;
+        console.log(targetDocumentElement.scrollHeight - (targetDocumentElement.scrollTop + window.innerHeight));
+        if (targetDocumentElement.scrollHeight - (targetDocumentElement.scrollTop + window.innerHeight) < 100) {
+                setFetching(true);
             }
-            catch(err){
-                onError(err);
-            }
-        }
-
-        fetchData();
-    }, [currentPage]);
+    }
 
     useEffect(() => {
-        const handleScroll = (e) => {
-            const scrollHeight = e.target.documentElement.scrollHeight;
-            const currnetHeight = e.target.documentElement.scrollTop;
-            if (elementHeight !== 0 && currnetHeight + elementHeight * displayableElementsCount >= scrollHeight)
-                setCurrentPage(c => c + 1);
+        if (fetching) {
+            demandAdditionData(currentPage, elementsPerPage)
+            .then(response => {
+                setData(prev => [...prev, ...response.newData]);
+                setCurrentPage(prev => prev + 1);
+            })
+            .finally(() => setFetching(false));
         }
-
-        dataHolderRef.current?.addEventListener("scroll", handleScroll);
-
-        return () => dataHolderRef.current.removeEventListener("scroll", handleScroll);
-    }, [dataHolderRef, elementHeight]);
+    }, [fetching]);
 
     useEffect(() => {
-        if (elementHeight === 0 && dataHolderRef.current != null)
-            setElementHeight(dataHolderRef.current.scrollHeight / 2.0 / displayableElementsCount);
-    }, [dataHolderRef])
+        document.addEventListener("scroll", scrollHandler);
 
-    return <div ref={dataHolderRef}>
-        {data && data.map((elem, i) => mapData(elem, i))}
+        return function () {
+            document.removeEventListener("scroll", scrollHandler);
+        };
+    }, []);
+
+    return <div className="list">
+        {data.map((elem, index) => mapDisplayData(elem, index))}
     </div>
-
-
 }

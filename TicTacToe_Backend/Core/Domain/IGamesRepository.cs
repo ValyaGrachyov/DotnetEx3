@@ -6,7 +6,7 @@ public interface IGameRoomRepository
 {
     public Task<TicTacToeGameRoom?> GetGameRoomByIdAsync(Guid sessionId);
 
-    public Task<IEnumerable<TicTacToeGameRoom>?> GetGameRooms();
+    public Task<IEnumerable<TicTacToeGameRoom>?> GetActiveGameRoomsAsync(int page, int limit);
 
     public Task UpdateSessionStatusAsync(Guid sessionId, TicTacToeRoomState state);
 
@@ -14,5 +14,9 @@ public interface IGameRoomRepository
 
     public Task UpdateSessionAsync(TicTacToeGameRoom session);
 
-    public Task<string> CreateRoom(int maxRate, string creatorId, string creatorUserName);
+    public Task<Guid> AddRoomAsync(int maxRate, string creatorId, string creatorUserName);
+
+    public Task RemoveRoomGameByIdAsync(Guid id);
+
+    public Task<long> GetGameRoomsCountAsync();
 }

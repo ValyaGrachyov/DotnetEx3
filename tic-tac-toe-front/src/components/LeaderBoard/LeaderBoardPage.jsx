@@ -1,8 +1,31 @@
+import { useEffect, useState } from "react";
+import API from "../../httpclient";
+
 function LeaderBoardPage() {
+
+    const [rates, setRates] = useState([]);
+
+    async function loadRates() {
+        
+            var res = await API.getUsersRaiting();
+            setRates(res.data.value);
+            console.log(rates);
+    }
+
+    useEffect(() => {
+        loadRates();
+    },[])    
 
     return (
         <div>
-            Таблица лидеров
+            <p>Таблица лидеров:</p>
+            {rates.map((el) => 
+            <div>
+                <p>{el.username} : {el.rate}</p>                
+            </div>
+            
+            )}
+
         </div>
     );
 }

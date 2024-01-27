@@ -1,14 +1,13 @@
 ﻿using Contracts;
 using DataAccess;
 using MassTransit;
-
+using Microsoft.Extensions.Logging;
 
 namespace Features.Services
 {
     public class RateChangeConsumer : IConsumer<UserRateChangeRequest>
     {
         private readonly IUserRepository _userRepository;
-
         public RateChangeConsumer(IUserRepository userRepo)
         {
             _userRepository = userRepo;
@@ -19,7 +18,7 @@ namespace Features.Services
             var data = context.Message;
 
             var user = await _userRepository.GetUserByIdAsync(data.UserId);
-            if (user == null || user.Rate <= 0)
+            if (user == null || user.Rate < 0)
             {
                 return;
             }
@@ -34,8 +33,8 @@ namespace Features.Services
                 var allowedChange = user.Rate switch
                 {
                     >= 3 => data.ChangeDelta,
-                    2 => 2,
-                    1 => 1,
+                    2 => - 2,
+                    1 => - 1,
                     _ => 0
                 };
                 

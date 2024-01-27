@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Contracts;
 
-public class UserRateChangeRequest
+public record UserRateChangeRequest
 {
     public string UserId { get; set; }
 

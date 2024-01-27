@@ -1,6 +1,7 @@
 ﻿using Domain.TicTacToe;
 using Domain.TicTacToe.GameEvents;
 using DataAccess;
+using Domain.TicTacToe.Exceptions;
 
 namespace Features.Services;
 
@@ -9,9 +10,11 @@ public class GameEngine : ITicTacToeGameEngine
     private readonly IGameRoomRepository _gamesRepository;
     private readonly IAwarder _awarder;
 
-    public GameEngine(IGameRoomRepository gamesRepository)
+
+    public GameEngine(IGameRoomRepository gamesRepository, IAwarder awarder)
     {
         _gamesRepository = gamesRepository;
+        _awarder = awarder;
     }
 
     private async Task InitGameAsync(TicTacToeGameRoom room)
@@ -120,7 +123,8 @@ public class GameEngine : ITicTacToeGameEngine
             Row = row,
             PutSymbol = player.Symbol,
             RoomId = game.RoomId,
-            UserId = player.UserId
+            UserId = player.UserId,
+            Username = player.Username
         });
 
         (bool HasWinningCombination, TicTacToeSymbols WonSymbol) = TryFindWinningCombination(game.GameField);
@@ -132,10 +136,11 @@ public class GameEngine : ITicTacToeGameEngine
             {
                 RoomId = game.RoomId,
                 WinnerId = game.Winner == Winner.Player1 ? game.Player1.UserId : game.Player2.UserId,
+                WinnerName = game.Winner == Winner.Player1 ? game.Player1.Username : game.Player2.Username,
             });
 
             await _awarder.ChangeUserRateAsync(game.Winner == Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, 3);
-            await _awarder.ChangeUserRateAsync(game.Winner != Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, -3);
+            await _awarder.ChangeUserRateAsync(game.Winner != Winner.Player1 ? game.Player1.UserId : game.Player2.UserId, -1);
         }
         else if (NoTurnsLeft(game.GameField))
         {
@@ -144,17 +149,12 @@ public class GameEngine : ITicTacToeGameEngine
             events.Add(new GameEndEvent()
             {
                 RoomId = game.RoomId,
-                WinnerId = default
+                WinnerId = default,
+                WinnerName = default
             });
         }
         else
         {
-            events.Add(new TurnSwitchEvent()
-            {
-                RoomId = game.RoomId,
-                WaitingForUserId = game.IsPlayer1Turn ? game.Player1.UserId : game.Player2.UserId,
-                WaitingForUser = game.IsPlayer1Turn ? game.Player1.Username : game.Player2.Username
-            });
             game.IsPlayer1Turn = !game.IsPlayer1Turn;
         }
 
@@ -167,41 +167,68 @@ public class GameEngine : ITicTacToeGameEngine
     public async Task<IEnumerable<TicTacToeGameEvent>> ExitRoomAsync(TicTacToeGameRoom room, string userId)
     {
         var events = new List<TicTacToeGameEvent>();
-
-        if (room.CurrentGameState != TicTacToeRoomState.RestartCooldown || room.CurrentGameState != TicTacToeRoomState.WaitingForOpponent)
+        bool roomOwnerLeft = room.RoomCreatorId == userId;
+        bool gameWasRunning = room.CurrentGameState == TicTacToeRoomState.Loading || room.CurrentGameState == TicTacToeRoomState.Started;
+        var userLeftEvent = new UserLeftRoomEvent()
         {
-            events.Add(new GameEndEvent()
+            RoomId = room.Id,
+            UserId = userId,
+            Username = roomOwnerLeft ? room.CreatorUserName : room.OpponentUserName!
+        };
+
+        room.CurrnetGame = default;
+        if (roomOwnerLeft)
+        {
+            room.CurrentGameState = TicTacToeRoomState.Closed;
+            events.Add(new RoomWasClosedGameEvent()
             {
-                RoomId = room.Id,
-                WinnerId = room.OpponentId == userId ? room.RoomCreatorId : room.OpponentId,
-                WinnerName = room.OpponentId == userId ? room.CreatorUserName : room.OpponentUserName,
+                RoomId = room.Id
             });
-            await _awarder.ChangeUserRateAsync(userId, -3);
-        }
-
-        if (room.RoomCreatorId == userId)
-        {
-            room.CurrentGameState = TicTacToeRoomState.WaitingForOpponent;
-            room.OpponentId = null;
-            room.OpponentUserName = null;
         }
         else
         {
-            room.CurrentGameState = TicTacToeRoomState.Closed;
+            room.OpponentId = default;
+            room.OpponentUserName = default;
+
+            var gameState = room.CurrentGameState;
+
+            if (gameState == TicTacToeRoomState.Loading || gameState == TicTacToeRoomState.Started)
+            {
+                room.CurrentGameState = TicTacToeRoomState.Finished;
+                events.Add(new GameEndEvent()
+                {
+                    RoomId = room.Id,
+                });
+            }
+
+            if (gameState == TicTacToeRoomState.Finished)
+            {
+                room.CurrentGameState = TicTacToeRoomState.WaitingForOpponent;
+                events.Add(new WaitingForOpponentGameEvent()
+                {
+                    RoomId = room.Id,
+                });
+            }
         }
-        room.CurrnetGame = null;
+        var punishmentTask = gameWasRunning ? _awarder.ChangeUserRateAsync(userId, -3) : Task.CompletedTask;
+        await Task.WhenAll(_gamesRepository.UpdateSessionAsync(room), punishmentTask);
 
-        await _gamesRepository.UpdateSessionAsync(room);
-
-        return new TicTacToeGameEvent[]
-        {
-        };
+        events.Add(userLeftEvent);
+        return events;
     }
 
     public async Task<IEnumerable<TicTacToeGameEvent>> JoinRoomAsync(TicTacToeGameRoom room, string userId, string userName)
     {
+        var joinEvent = new TicTacToeGameEvent[] { new UserJoinRoomEvent() { RoomId = room.Id, Username = userName, UserId = userId } };
+
         room.OpponentId = userId;
         room.OpponentUserName = userName;
+
+        return joinEvent.Concat(await StartGameAsync(room));
+    }
+
+    private async Task<IEnumerable<TicTacToeGameEvent>> StartGameAsync(TicTacToeGameRoom room)
+    {
         await InitGameAsync(room);
         var game = room.CurrnetGame!;
         return new TicTacToeGameEvent[]
@@ -214,5 +241,13 @@ public class GameEngine : ITicTacToeGameEngine
                     Player2 = game.Player2,
                 }
         };
+    }
+
+    public Task<IEnumerable<TicTacToeGameEvent>> RestartGameAsync(TicTacToeGameRoom room)
+    {
+        if (room.CurrentGameState != TicTacToeRoomState.Finished || room.OpponentId == null)
+            throw new ActionRefusedGameException();
+
+        return StartGameAsync(room);
     }
 }

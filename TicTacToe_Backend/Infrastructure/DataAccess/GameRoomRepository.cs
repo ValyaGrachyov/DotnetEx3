@@ -1,6 +1,7 @@
 ﻿using Domain.TicTacToe;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System;
 
 namespace DataAccess;
 public class GameRoomRepository : IGameRoomRepository
@@ -20,11 +21,19 @@ public class GameRoomRepository : IGameRoomRepository
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<TicTacToeGameRoom>?> GetGameRooms()
+    public async Task<IEnumerable<TicTacToeGameRoom>?> GetActiveGameRoomsAsync(int page, int limit)
     {
-        var rooms = await _collection.FindAsync(x => true);
+        
+        var filter = Builders<TicTacToeGameRoom>.Filter.Where(x => x.CurrentGameState != TicTacToeRoomState.Closed);
+        
+        var data = await _collection.Find(filter)
+            .SortByDescending(x => x.CreationDateTimeUtc)
+            .ThenByDescending(x => x.CurrentGameState)
+            .Skip((page - 1) * limit)
+            .Limit(limit)
+            .ToListAsync();
 
-        return rooms.ToEnumerable();
+        return data;
     }   
 
     public async Task UpdateRoomGameAsync(Guid roomId, TicTacToeGame game)
@@ -57,14 +66,14 @@ public class GameRoomRepository : IGameRoomRepository
         await _collection.UpdateOneAsync(filter, update);
     }
 
-    public async Task<string> CreateRoom(int maxRate, string creatorId, string creatorUserName)
+    public async Task<Guid> AddRoomAsync(int maxRate, string creatorId, string creatorUserName)
     {
         var gameRoom = new TicTacToeGameRoom()
         {
             Id = Guid.NewGuid(),
             CurrentGameState = TicTacToeRoomState.WaitingForOpponent,
             RoomCreatorId = creatorId,
-            CreationDateTimeUtc = DateTime.Now.Date,
+            CreationDateTimeUtc = DateTime.UtcNow,
             MaxAllowedPlayerRate = maxRate,
             CreatorUserName = creatorUserName,
             OpponentId = null,
@@ -72,6 +81,18 @@ public class GameRoomRepository : IGameRoomRepository
         };
 
         await _collection.InsertOneAsync(gameRoom);
-        return gameRoom.Id.ToString();
+
+        return gameRoom.Id;
+    }
+
+    public Task RemoveRoomGameByIdAsync(Guid id)
+    {
+        var filter = Builders<TicTacToeGameRoom>.Filter.Eq(x => x.Id, id);
+        return _collection.FindOneAndDeleteAsync(filter);
+    }
+
+    public Task<long> GetGameRoomsCountAsync()
+    {
+        return _collection.EstimatedDocumentCountAsync();
     }
 }

@@ -7,7 +7,7 @@ function throwError(err) {
 }
 
 class AxiosWrapper {
-    constructor(url = "https://localhost:7240") {
+    constructor(url = "https://localhost:81") {
         const options = {
             baseURL: url,
             timeout: 10000,
@@ -62,7 +62,7 @@ class AxiosWrapper {
     async joinRoom(roomId) {
         let joinResult = false;
         
-        await this.axiosInstance.post(`/rooms/${roomId}/join`)
+        await this.axiosInstance.post(`/games/${roomId}/join`)
             .then(() => {joinResult = true})
             .catch((err) => {
                 if (err.data)
@@ -72,16 +72,35 @@ class AxiosWrapper {
         return joinResult;
     }
 
-    async getrooms() {
-       const rooms = await this.axiosInstance.get("/rooms"); 
+    async exitRoom(roomId) {
+        try {
+            await this.axiosInstance.post(`/games/${roomId}/exit`);
+        }
+        catch{
+
+        }
+    }
+
+    async getrooms(page, limit) {
+       const rooms = await this.axiosInstance.get(`/games?page=${page}&limit=${limit}`)
+       .then(response => response.data)
+       .catch(err => {
+        if (err.status == 401)
+            document.location.href = "/login";
+
+        throw err;
+       }); 
        return rooms;       
     }
 
     async getroom(id) {
-        const room = await this.axiosInstance.get(`/rooms/${id}`);
-        if (room.data)
-            return room.data.value;
-        return {roomId: id};
+        const roomRequest = await this.axiosInstance.get(`/games/${id}`);
+        return roomRequest.data;
+    }
+
+    async createroom(data) {
+        const roomId = await this.axiosInstance.post(`/games`, data);
+        return roomId;
     }
 
 
@@ -89,6 +108,8 @@ class AxiosWrapper {
         const rates = await this.axiosInstance.get("/rate");
         return rates;
     }
+
+    
 }
 
 const API = new AxiosWrapper();

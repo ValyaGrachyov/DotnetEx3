@@ -1,11 +1,12 @@
-import GameState from "./GameState";
+import API from "../../httpclient";
 
-function ExitGameButton({ gameState, onReset }) {
-  if (gameState === GameState.inProgress) {
-    return;
+function ExitGameButton({ onExit }) {
+  async function exit() {
+    onExit();
   }
+
   return (
-    <button onClick={onReset} className="exit-button">
+    <button onClick={() => exit()} className="exit-button">
       Exit Game
     </button>
   );

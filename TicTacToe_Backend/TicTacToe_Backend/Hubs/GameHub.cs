@@ -1,9 +1,9 @@
 ﻿using Domain.TicTacToe.GameEvents;
-using Domain.UserStatistics;
 using Features.GameManagment.MakeTurn;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using TicacToe_Backend.Helpers.Extensions;
 
 namespace TicacToe_Backend.Hubs;
 
@@ -19,21 +19,12 @@ public class GameHub : Hub<IGameEventsReciever>
 
     public async Task SubscribeRoomEvents(string roomId)
     {
-        //todo: validate if room exists
-
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-
-        await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} joined the room.");
     }
 
     public async Task UnsubscribeRoomEvents(string roomId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
-
-        //todo: validate if room exists
-        // assign connection to group
-
-        await Clients.Group(roomId).RoomMessage("SERVER", $"{GetCurrentUsername()} left the room.");
     }
 
     public async Task MakeTurn(string roomId, int row, int column)
@@ -42,7 +33,7 @@ public class GameHub : Hub<IGameEventsReciever>
             return;
 
         var userId = GetCurrentUserId();
-        var makeTurnResult = await _mediator.Send(new MakeTurnCommand(roomId, userId, row, column));
+        var makeTurnResult = await _mediator.Send(new MakeTurnCommand(roomGuid, userId, row, column));
         if (!makeTurnResult.IsSuccess)
             await Clients.Client(Context.ConnectionId).GameEvent(new WrongArgumentEvent()
             {
@@ -54,13 +45,12 @@ public class GameHub : Hub<IGameEventsReciever>
             });
     }
 
-    public Task SendGameEventAsync(string roomId, TicTacToeGameEvent gameEvent)
+    public Task SendRoomMessage(string roomId, string message)
     {
-        // event notifier - create service wich implements IUpdater
-        return Clients.Group(roomId).GameEvent(gameEvent);
+        return Clients.Group(roomId).RoomMessage(GetCurrentUsername(), message);
     }
 
-    private string GetCurrentUsername() => Context.User.Claims.Skip(1).FirstOrDefault()!.Value;
+    private string GetCurrentUsername() => Context.User.GetUserUsername()!;
 
-    private string GetCurrentUserId() => Context.User.Claims.FirstOrDefault()!.Value;
+    private string GetCurrentUserId() => Context.User.GetUserId()!;
 }

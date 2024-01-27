@@ -1,5 +1,6 @@
 ﻿using DataAccess;
 using Domain.TicTacToe;
+using Domain.TicTacToe.Exceptions;
 using Shared.CQRS;
 using Shared.Results;
 
@@ -20,10 +21,7 @@ public class MakeTurnCommandHandler : ICommandHandler<MakeTurnCommand>
 
     public async Task<Result> Handle(MakeTurnCommand request, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(request.RoomId, out var roomId))
-            return Result.ErrorResult;
-
-        var room = await _gameRoomRepository.GetGameRoomByIdAsync(roomId);
+        var room = await _gameRoomRepository.GetGameRoomByIdAsync(request.RoomId);
         if (room == null)
             return Result.ErrorResult;
 
@@ -39,25 +37,38 @@ public class MakeTurnCommandHandler : ICommandHandler<MakeTurnCommand>
             return Result.ErrorResult;
 
         var row = request.Row;
-        var column = request.Row;
+        var column = request.Column;
         if (row is < 0 or > 2 || column is < 0 or > 2 || game.GameField[row * 3 + column] != TicTacToeSymbols.None)
             return Result.ErrorResult;
 
         var events = await _engine.MakeTurnAsync(game, row, column);
-
+        
         foreach (var gameEvent in events)
             await _gameEventNotifier.RecordUpdateAsync(gameEvent);
 
         if (game.Winner != null)
-            OnWin();
+            await AfterWinAsync(room);
 
         return Result.SuccessResult;
     }
 
-    private void OnWin()
+    private async Task AfterWinAsync(TicTacToeGameRoom room)
     {
-        //restart game
-        //increment users rate
-        //todo: revalidate user rate after winning
+        await _gameRoomRepository.UpdateSessionStatusAsync(room.Id, TicTacToeRoomState.Finished);
+        await Task.Delay(TimeSpan.FromSeconds(10));
+        room = await _gameRoomRepository.GetGameRoomByIdAsync(room.Id);
+
+        if (room != null && room.CurrentGameState == TicTacToeRoomState.Finished)
+        {
+            try
+            {
+                var events = await _engine.RestartGameAsync(room);
+                foreach (var gameEvent in events)
+                    await _gameEventNotifier.RecordUpdateAsync(gameEvent);
+            }
+            catch(ActionRefusedGameException)
+            {
+            }
+        }
     }
 }

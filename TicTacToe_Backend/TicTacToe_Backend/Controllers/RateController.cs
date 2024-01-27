@@ -1,5 +1,7 @@
-﻿using DataAccess;
+﻿using System.Formats.Asn1;
+using DataAccess;
 using Features.UserRate.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +12,19 @@ namespace TicacToe_Backend.Controllers;
 [Route("/rate")]
 public class RateController: ControllerBase
 {
-    //TODO finish rate methods
-    // [HttpGet]
-    // public async Task<IEnumerable<UsersRateDto>> GetUsersRate()
-    // {
-    //     return Ok();
-    // }
+    private readonly IMediator _mediator;
+
+    public RateController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    
+    [HttpGet]
+    public async Task<IActionResult> GetUsersRate()
+    {
+        var usersRate = await _mediator.Send(new GetUsersRateQuery());
+        return new JsonResult(usersRate);
+    }    
+    
 }
